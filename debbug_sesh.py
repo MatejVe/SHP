@@ -1,4 +1,5 @@
 import numpy as np
+import operator
 
 # TODO: fix the problem of simultaneous collisiions of particles
 
@@ -6,7 +7,7 @@ def ring_distance(particle1, particle2):  # Assume that the particle1 is the fir
     pos1, vel1 = particle1.position, particle1.velocity
     pos2, vel2 = particle2.position, particle2.velocity
 
-    # Tranfer into the inertial reference frame of particle 1
+    # Transfer into the inertial reference frame of particle 1
     velDiff = vel2 - vel1
 
     if velDiff < 0:  # The right particle is moving towards the left one
@@ -38,16 +39,18 @@ class Particle:
     the data for each particle and the update function which updates the data.
     """
 
-    def __init__(self, mass, initPos, initVel):
+    def __init__(self, mass, initPos, initVel, index=None):
         """"
         Arguments:
             mass (float) -> mass of the particle
             initPos (float) -> between 0 and 1, initial position of the particle
             initVel (float) -> pretty much any real number, initial velocity of the particle
+            index (number) -> number assigned to this particle, defaults to None
         """
         self.mass = mass
         self.position = initPos
         self.velocity = initVel
+        self.index = index
 
     def update(self, newPos=None, newVel=None):
         if newPos is not None:
@@ -96,17 +99,21 @@ class Sistem:
             raise Exception('Differing amount of positions to the amount of particles was provided!')
 
         if initVelocities == 'random':
-            initVelocities = np.random.random(size=particleNum)
+            initVelocities = 2*np.random.random(size=particleNum) - 1  # Initialize random velocities in the range [-1, 1)
         elif not isinstance(initVelocities, list):
             raise Exception('Not a valid input for the velocities, if not "random" the input has to be a list of velocities!')
         elif len(initVelocities) != particleNum:
             raise Exception('Differing amount of velocities to the amount of particles was provided!')
 
-        self.particles = [Particle(mass, initPos, initVel) for mass, initPos, initVel in zip(masses, initPositions, initVelocities)]
+        self.particles = [Particle(mass, initPos, initVel, index) for index, (mass, initPos, initVel) in enumerate(zip(masses, initPositions, initVelocities))]
         self.positions = [particle.position for particle in self.particles]
         self.velocities = [particle.velocity for particle in self.particles]
+        self.indexes = [particle.index for particle in self.particles]
         self.momentum = sum([particle.mass * particle.velocity for particle in self.particles])
         self.energy = sum([1/2 * particle.mass * particle.velocity**2 for particle in self.particles])
+        time, colParIndex = self.find_next_event()
+        self.time = time  # Store the time interval for which the particles are in the current state
+        self.collideIndices = colParIndex  # Store the indices of the two particles that will collide
 
     def find_next_event(self):
         """
@@ -115,7 +122,7 @@ class Sistem:
         """
         shortestTime = 1e10  # Start with a big number
         for i in range(self.particleNum):
-            distanceLeft = ring_distance(self.particles[i], self.particles[i-1])  # Only check with the particle to the right, to avoid doublechecking
+            distanceLeft = ring_distance(self.particles[i-1], self.particles[i])  # Only check with the particle to the left, to avoid doublechecking
 
             if self.particles[i-1].velocity == self.particles[i].velocity:  # if the particles have the same velocity they will never collide
                 time = 1e10
@@ -128,13 +135,10 @@ class Sistem:
 
         return (shortestTime, collideParticlesIndex)
 
-    def update_particles(self):
+    def update_particles(self, time, colParIndex):
         """
-        Function finds when the next collision will happen and which particles collide.
-        Then, it updates the positions and velocities of all particles.
+        Function updates the positions of all particles and velocities of particles that collied in the event.
         """
-        time, colParIndex = self.find_next_event()
-        self.time = time  # Store the time interval for which the particles were in the state previous to the one that will be calculated now
         for particle in self.particles:
             # Update the positions of all the particles, the ones colliding will be at the same position
             vel = particle.velocity
@@ -157,9 +161,18 @@ class Sistem:
         self.momentum = sum([particle.mass * particle.velocity for particle in self.particles])
         self.energy = sum([1/2 * particle.mass * particle.velocity**2 for particle in self.particles])
 
+        # Sort the particle list by position
+        self.particles.sort(key=lambda x: x.position)
+        self.indexes = [particle.index for particle in self.particles]
+
         # Update the positions and velocities in the sistem class for purposes of logging them later
         self.positions = [particle.position for particle in self.particles]
         self.velocities = [particle.velocity for particle in self.particles]
+
+        # Find the time the particles will stay in this state and the next two colliding particles
+        time, colParIndex = self.find_next_event()
+        self.time = time
+        self.collideIndices = colParIndex
 
 
 class Simulation:
@@ -184,11 +197,10 @@ class Simulation:
 
         Args:
             shouldPrint (list, optional): List of sistem object attributes you would like to have printed out. 
-                                          Options are: 'positions', 'velocities', 'time', 'energy', 'momentum'.
+                                          Options are: 'positions', 'velocities', 'time', 'energy', 'momentum', 'indexes'.
                                           Defaults to None.
         """
         for i in range(self.collisionNumber):
-            self.sistem.update_particles()
 
             for attribute in shouldPrint:  # Just fancy pritting tools, not important to the physics
                 if hasattr(self.sistem, attribute):
@@ -203,7 +215,9 @@ class Simulation:
 
             if shouldPrint is not None:
                 print('')
+
+            self.sistem.update_particles(self.sistem.time, self.sistem.collideIndices)
             
 
-Experiment1 = Simulation(collisionNumber=100, particleNumber=3)
-Experiment1.run(shouldPrint=['positions', 'velocities', 'time', 'energy', 'momentum'])
+Experiment1 = Simulation(collisionNumber=10, particleNumber=3)
+Experiment1.run(shouldPrint=['positions', 'velocities', 'indexes'])
