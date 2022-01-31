@@ -1,38 +1,7 @@
 import numpy as np
-import operator
-
-# TODO: fix the problem of simultaneous collisiions of particles
-
-def ring_distance(particle1, particle2):  # Assume that the particle1 is the first one to the left of the particle2
-    pos1, vel1 = particle1.position, particle1.velocity
-    pos2, vel2 = particle2.position, particle2.velocity
-
-    # Transfer into the inertial reference frame of particle 1
-    velDiff = vel2 - vel1
-
-    if velDiff < 0:  # The right particle is moving towards the left one
-        # Find the right (from particle 1) distance between the particles
-        if pos2 > pos1:
-            return abs(pos2 - pos1)
-        elif pos2 < pos1: # e.g. x_1 = 0.9, x_2 = 0.2
-            return 1 - abs(pos2 - pos1)
-        else:
-            return 1
-    elif velDiff > 0:
-        # Find the left (from particle 1) distance between the particles
-        if pos2 > pos1:
-            return 1 - abs(pos2 - pos1)
-        elif pos2 < pos1:
-            return abs(pos2 - pos1)
-        else:
-            return 1
-    
-def elastic_collision(M1, u1, M2, u2):
-    v1 = (M1 - M2)/(M1 + M2) * u1 + 2*M2/(M1 + M2) * u2
-    v2 = 2*M1/(M1+M2) * u1 + (M2 - M1)/(M1 + M2) * u2
-    return v1, v2
 
 # Let's start with defining the classes that will be used in the simulation
+# Base particle class
 class Particle:
     """
     Base class for a particle. Not much is happening in here apart from storing
@@ -58,8 +27,40 @@ class Particle:
 
         if newVel is not None:
             self.velocity = newVel
+# TODO: fix the problem of simultaneous collisiions of particles
+
+# Auxiliary functions used in the code
+def ring_distance(particle1, particle2):  # Assume that the particle1 is the first one to the left of the particle2
+    pos1, vel1 = particle1.position, particle1.velocity
+    pos2, vel2 = particle2.position, particle2.velocity
+
+    # Transfer into the inertial reference frame of particle 1
+    velDiff = vel2 - vel1
+
+    if velDiff < 0:  # The right particle is moving towards the left one
+        # Find the right (from particle 1) distance between the particles
+        if pos2 > pos1:
+            return abs(pos2 - pos1)
+        elif pos2 < pos1: # e.g. x_1 = 0.9, x_2 = 0.2
+            return 1 - abs(pos2 - pos1)
+        else:
+            return 1
+    elif velDiff > 0:
+        # Find the left (from particle 1) distance between the particles
+        if pos2 > pos1:
+            return 1 - abs(pos2 - pos1)
+        elif pos2 < pos1:
+            return abs(pos2 - pos1)
+        else:
+            return 1
+
+def elastic_collision(M1, u1, M2, u2):
+    v1 = (M1 - M2)/(M1 + M2) * u1 + 2*M2/(M1 + M2) * u2
+    v2 = 2*M1/(M1+M2) * u1 + (M2 - M1)/(M1 + M2) * u2
+    return v1, v2
 
 
+# Class that simulates a sistem of particlese and their interactions.
 class Sistem:
     """
     Class which simulates a system of particles.
@@ -140,11 +141,13 @@ class Sistem:
         Function updates the positions of all particles and velocities of particles that collied in the event.
         """
         for particle in self.particles:
-            # Update the positions of all the particles, the ones colliding will be at the same position
+            # Update the positions of all the particles, the ones colliding will be at the same position, apart from floating point errors
             vel = particle.velocity
             pos = particle.position
             newPos = (pos + time*vel) % 1
             particle.update(newPos=newPos)
+        # ensure the collided particles are at the same position (because of floating point errors)
+        self.particles[colParIndex[0]].update(newPos=self.particles[colParIndex[1]].position)
 
         # Update the velocities of the particles that have collided
         mass1 = self.particles[colParIndex[0]].mass
@@ -157,12 +160,36 @@ class Sistem:
         self.particles[colParIndex[0]].update(newVel=newVel1)
         self.particles[colParIndex[1]].update(newVel=newVel2)
 
+        # Since the particles will get sorted, the list indexes will get changed and colParIndex becomes useless
+        # Save the actuall particle indices
+        leftParticleIndex = self.particles[colParIndex[0]].index
+        rightParticleIndex = self.particles[colParIndex[1]].index
+
         # Recalculate the energy and momentum
         self.momentum = sum([particle.mass * particle.velocity for particle in self.particles])
         self.energy = sum([1/2 * particle.mass * particle.velocity**2 for particle in self.particles])
 
         # Sort the particle list by position
         self.particles.sort(key=lambda x: x.position)
+        
+        # For the particles that have just collided, check if the ordering is right
+        # First find the list index of the particles
+        for i in range(self.particleNum):
+            if self.particles[i].index == leftParticleIndex:
+                leftListIndex = i
+            if self.particles[i].index == rightParticleIndex:
+                rightListIndex = i
+        
+        # Ensure the comparison goes right - left
+        if rightListIndex < leftListIndex:
+            leftListIndex, rightListIndex = rightListIndex, leftListIndex
+
+        if (self.particles[rightListIndex].index - self.particles[leftListIndex].index) % len(self.particles) == len(self.particles) - 1:
+            # switch the particles
+            particle1 = self.particles[rightListIndex]
+            particle2 = self.particles[leftListIndex]
+            self.particles[rightListIndex], self.particles[leftListIndex] = particle2, particle1
+
         self.indexes = [particle.index for particle in self.particles]
 
         # Update the positions and velocities in the sistem class for purposes of logging them later
@@ -175,6 +202,7 @@ class Sistem:
         self.collideIndices = colParIndex
 
 
+# Class wrapper for a single simulation experiment.
 class Simulation:
 
     def __init__(self, collisionNumber, particleNumber, masses='random', initPoss='random', initVels='random'):
@@ -200,7 +228,7 @@ class Simulation:
                                           Options are: 'positions', 'velocities', 'time', 'energy', 'momentum', 'indexes'.
                                           Defaults to None.
         """
-        for i in range(self.collisionNumber):
+        for _ in range(self.collisionNumber):
 
             for attribute in shouldPrint:  # Just fancy pritting tools, not important to the physics
                 if hasattr(self.sistem, attribute):
@@ -209,7 +237,7 @@ class Simulation:
                         print(attribute + ':', end=' ')
                         for value in values:
                             print(f'{value:.2f}', end=' ')
-                        print('', end=' | ')
+                        print('', end='| ')
                     else:
                         print(f'{attribute}:{getattr(self.sistem, attribute):e} |', end=' ')
 
@@ -219,5 +247,5 @@ class Simulation:
             self.sistem.update_particles(self.sistem.time, self.sistem.collideIndices)
             
 
-Experiment1 = Simulation(collisionNumber=10, particleNumber=3)
+Experiment1 = Simulation(collisionNumber=20, particleNumber=3, masses=[1, 1, 1], initPoss=[0.2, 0.5, 0.8], initVels=[1, 0, 1])
 Experiment1.run(shouldPrint=['positions', 'velocities', 'indexes'])
