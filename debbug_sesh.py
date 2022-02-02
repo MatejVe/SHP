@@ -1,4 +1,6 @@
+from operator import index
 import numpy as np
+from decimal import Decimal
 
 # Let's start with defining the classes that will be used in the simulation
 # Base particle class
@@ -16,9 +18,9 @@ class Particle:
             initVel (float) -> pretty much any real number, initial velocity of the particle
             index (number) -> number assigned to this particle, defaults to None
         """
-        self.mass = mass
-        self.position = initPos
-        self.velocity = initVel
+        self.mass = Decimal(str(mass))
+        self.position = Decimal(str(initPos))
+        self.velocity = Decimal(str(initVel))
         self.index = index
 
     def update(self, newPos=None, newVel=None):
@@ -42,23 +44,40 @@ def ring_distance(particle1, particle2):  # Assume that the particle1 is the fir
         if pos2 > pos1:
             return abs(pos2 - pos1)
         elif pos2 < pos1: # e.g. x_1 = 0.9, x_2 = 0.2
-            return 1 - abs(pos2 - pos1)
+            return Decimal("1") - abs(pos2 - pos1)
         else:
-            return 1
+            return Decimal("1")
     elif velDiff > 0:
         # Find the left (from particle 1) distance between the particles
         if pos2 > pos1:
-            return 1 - abs(pos2 - pos1)
+            return Decimal("1") - abs(pos2 - pos1)
         elif pos2 < pos1:
             return abs(pos2 - pos1)
         else:
-            return 1
+            return Decimal("1")
 
 def elastic_collision(M1, u1, M2, u2):
     v1 = (M1 - M2)/(M1 + M2) * u1 + 2*M2/(M1 + M2) * u2
     v2 = 2*M1/(M1+M2) * u1 + (M2 - M1)/(M1 + M2) * u2
     return v1, v2
 
+def can_collide(particlel, particler):
+    vell, indexl = particlel.velocity, particlel.index
+    velr, indexr = particler.velocity, particler.index
+    veldif = velr - vell
+    indexdif = indexr - indexl
+    if veldif > 0 and indexdif < 0:
+        return False
+    elif veldif < 0 and indexdif < 0:
+        return True
+    elif veldif > 0 and indexdif > 0:
+        return False
+    elif veldif < 0 and indexdif > 0:
+        return True
+
+def n3_check_for_undetected_collision(collisionIndices): # n3 stands for this only works for three particles
+    if len(collisionIndices) == 2:
+        collisionIndices.append(collisionIndices[0])
 
 # Class that simulates a sistem of particlese and their interactions.
 class Sistem:
@@ -111,84 +130,98 @@ class Sistem:
         self.velocities = [particle.velocity for particle in self.particles]
         self.indexes = [particle.index for particle in self.particles]
         self.momentum = sum([particle.mass * particle.velocity for particle in self.particles])
-        self.energy = sum([1/2 * particle.mass * particle.velocity**2 for particle in self.particles])
-        time, colParIndex = self.find_next_event()
+        self.energy = sum([Decimal("0.5") * particle.mass * particle.velocity**2 for particle in self.particles])
+        time, collidingParticles = self.find_next_event_s()
         self.time = time  # Store the time interval for which the particles are in the current state
-        self.collideIndices = colParIndex  # Store the indices of the two particles that will collide
+        self.collideIndices = collidingParticles  # Store the indices of the two particles that will collide
 
-    def find_next_event(self):
+    def find_next_event_s(self):
         """
         Function that finds when the next collision will happen, and what two particles will collide.
         Returns a tuple of the format (time to collision, (index of particle 1 that collides, index of particle 2 that collides))
         """
         shortestTime = 1e10  # Start with a big number
+        collideParticlesIndex = []
         for i in range(self.particleNum):
-            distanceLeft = ring_distance(self.particles[i-1], self.particles[i])  # Only check with the particle to the left, to avoid doublechecking
+            if can_collide(self.particles[i-1], self.particles[i]):
+                distanceLeft = ring_distance(self.particles[i-1], self.particles[i])  # Only check with the particle to the left, to avoid doublechecking
 
-            if self.particles[i-1].velocity == self.particles[i].velocity:  # if the particles have the same velocity they will never collide
-                time = 1e10
-            else:
-                time = distanceLeft / (abs(self.particles[i-1].velocity - self.particles[i].velocity))
+                if self.particles[i-1].velocity == self.particles[i].velocity:  # if the particles have the same velocity they will never collide
+                    time = 1e10
+                else:
+                    time = distanceLeft / (abs(self.particles[i-1].velocity - self.particles[i].velocity))
 
-            if time < shortestTime:
-                shortestTime = time
-                collideParticlesIndex = (i-1, i)
+                if time < shortestTime:
+                    shortestTime = time
+                    collideParticlesIndex = [(i-1, i)]
+                elif time == shortestTime:
+                    collideParticlesIndex.append((i-1, i))
 
+        if self.particleNum == 3:  # Since it only works for 3 particles
+            n3_check_for_undetected_collision(collideParticlesIndex)
         return (shortestTime, collideParticlesIndex)
 
-    def update_particles(self, time, colParIndex):
+    def update_particles(self, time, collidingIndices):
         """
-        Function updates the positions of all particles and velocities of particles that collied in the event.
+        Function updates the positions of all particles and velocities of particles that collided in the event.
         """
         for particle in self.particles:
             # Update the positions of all the particles, the ones colliding will be at the same position, apart from floating point errors
             vel = particle.velocity
             pos = particle.position
-            newPos = (pos + time*vel) % 1
+            newPos = (pos + time*vel)
+            newPos = newPos + Decimal("1") if newPos < 0 else newPos
             particle.update(newPos=newPos)
-        # ensure the collided particles are at the same position (because of floating point errors)
-        self.particles[colParIndex[0]].update(newPos=self.particles[colParIndex[1]].position)
+        
+        particleIndices = []
+        for index in collidingIndices:
+            left, right = index
+            # ensure the collided particles are at the same position (because of floating point errors)
+            # self.particles[left].update(newPos=self.particles[right].position)
 
-        # Update the velocities of the particles that have collided
-        mass1 = self.particles[colParIndex[0]].mass
-        vel1 = self.particles[colParIndex[0]].velocity
-        mass2 = self.particles[colParIndex[1]].mass
-        vel2 = self.particles[colParIndex[1]].velocity
+            # Update the velocities of the particles that have collided
+            mass1 = self.particles[left].mass
+            vel1 = self.particles[left].velocity
+            mass2 = self.particles[right].mass
+            vel2 = self.particles[right].velocity
 
-        newVel1, newVel2 = elastic_collision(mass1, vel1, mass2, vel2)
+            newVel1, newVel2 = elastic_collision(mass1, vel1, mass2, vel2)
 
-        self.particles[colParIndex[0]].update(newVel=newVel1)
-        self.particles[colParIndex[1]].update(newVel=newVel2)
+            self.particles[left].update(newVel=newVel1)
+            self.particles[right].update(newVel=newVel2)
 
-        # Since the particles will get sorted, the list indexes will get changed and colParIndex becomes useless
-        # Save the actuall particle indices
-        leftParticleIndex = self.particles[colParIndex[0]].index
-        rightParticleIndex = self.particles[colParIndex[1]].index
+            # Since the particles will get sorted, the list indexes will get changed and colParIndex becomes useless
+            # Save the actual particle indices
+            particleIndices.append((self.particles[left].index, self.particles[right].index))
 
         # Recalculate the energy and momentum
+
         self.momentum = sum([particle.mass * particle.velocity for particle in self.particles])
-        self.energy = sum([1/2 * particle.mass * particle.velocity**2 for particle in self.particles])
+        self.energy = sum([Decimal("0.5") * particle.mass * particle.velocity**2 for particle in self.particles])
 
         # Sort the particle list by position
         self.particles.sort(key=lambda x: x.position)
         
         # For the particles that have just collided, check if the ordering is right
         # First find the list index of the particles
+        leftListIndices = []
+        rightListIndices = []
         for i in range(self.particleNum):
-            if self.particles[i].index == leftParticleIndex:
-                leftListIndex = i
-            if self.particles[i].index == rightParticleIndex:
-                rightListIndex = i
+            if self.particles[i].index in [index[0] for index in particleIndices]:
+                leftListIndices.append(i)
+            if self.particles[i].index in [index[1] for index in particleIndices]:
+                rightListIndices.append(i)
         
-        # Ensure the comparison goes right - left
-        if rightListIndex < leftListIndex:
-            leftListIndex, rightListIndex = rightListIndex, leftListIndex
+        for leftListIndex, rightListIndex in zip(leftListIndices, rightListIndices):
+            # Ensure the comparison goes right - left
+            if rightListIndex < leftListIndex:
+                leftListIndex, rightListIndex = rightListIndex, leftListIndex
 
-        if (self.particles[rightListIndex].index - self.particles[leftListIndex].index) % len(self.particles) == len(self.particles) - 1:
-            # switch the particles
-            particle1 = self.particles[rightListIndex]
-            particle2 = self.particles[leftListIndex]
-            self.particles[rightListIndex], self.particles[leftListIndex] = particle2, particle1
+            if (self.particles[rightListIndex].index - self.particles[leftListIndex].index) % len(self.particles) == len(self.particles) - 1:
+                # switch the particles
+                particle1 = self.particles[rightListIndex]
+                particle2 = self.particles[leftListIndex]
+                self.particles[rightListIndex], self.particles[leftListIndex] = particle2, particle1
 
         self.indexes = [particle.index for particle in self.particles]
 
@@ -197,7 +230,7 @@ class Sistem:
         self.velocities = [particle.velocity for particle in self.particles]
 
         # Find the time the particles will stay in this state and the next two colliding particles
-        time, colParIndex = self.find_next_event()
+        time, colParIndex = self.find_next_event_s()
         self.time = time
         self.collideIndices = colParIndex
 
@@ -247,5 +280,7 @@ class Simulation:
             self.sistem.update_particles(self.sistem.time, self.sistem.collideIndices)
             
 
-Experiment1 = Simulation(collisionNumber=20, particleNumber=3, masses=[1, 1, 1], initPoss=[0.2, 0.5, 0.8], initVels=[1, 0, 1])
+Experiment1 = Simulation(collisionNumber=20, particleNumber=3, masses=[1, 1, 1], initPoss=[0.2, 0.5, 0.8], initVels=[1, 0, -1])
+# Experiment1 = Simulation(collisionNumber=10, particleNumber=4, masses=[1, 1, 1, 1], initPoss=[0.1, 0.4, 0.6, 0.9], initVels=[1, -1, 1, -1])
+# Experiment1 = Simulation(collisionNumber=20, particleNumber=3)
 Experiment1.run(shouldPrint=['positions', 'velocities', 'indexes'])
