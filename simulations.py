@@ -1,6 +1,6 @@
-from operator import index
 import numpy as np
 from decimal import Decimal
+
 
 # Let's start with defining the classes that will be used in the simulation
 # Base particle class
@@ -29,7 +29,8 @@ class Particle:
 
         if newVel is not None:
             self.velocity = newVel
-# TODO: fix the problem of simultaneous collisiions of particles
+
+
 
 # Auxiliary functions used in the code
 def ring_distance(particle1, particle2):  # Assume that the particle1 is the first one to the left of the particle2
@@ -56,10 +57,12 @@ def ring_distance(particle1, particle2):  # Assume that the particle1 is the fir
         else:
             return Decimal("1")
 
+
 def elastic_collision(M1, u1, M2, u2):
     v1 = (M1 - M2)/(M1 + M2) * u1 + 2*M2/(M1 + M2) * u2
     v2 = 2*M1/(M1+M2) * u1 + (M2 - M1)/(M1 + M2) * u2
     return v1, v2
+
 
 def can_collide(particlel, particler):
     vell, indexl = particlel.velocity, particlel.index
@@ -75,9 +78,12 @@ def can_collide(particlel, particler):
     elif veldif < 0 and indexdif > 0:
         return True
 
+
 def n3_check_for_undetected_collision(collisionIndices): # n3 stands for this only works for three particles
     if len(collisionIndices) == 2:
         collisionIndices.append(collisionIndices[0])
+
+
 
 # Class that simulates a sistem of particlese and their interactions.
 class Sistem:
@@ -134,6 +140,8 @@ class Sistem:
         time, collidingParticles = self.find_next_event_s()
         self.time = time  # Store the time interval for which the particles are in the current state
         self.collideIndices = collidingParticles  # Store the indices of the two particles that will collide
+        self.masses = masses
+
 
     def find_next_event_s(self):
         """
@@ -161,23 +169,23 @@ class Sistem:
             n3_check_for_undetected_collision(collideParticlesIndex)
         return (shortestTime, collideParticlesIndex)
 
+
     def update_particles(self, time, collidingIndices):
         """
         Function updates the positions of all particles and velocities of particles that collided in the event.
         """
         for particle in self.particles:
-            # Update the positions of all the particles, the ones colliding will be at the same position, apart from floating point errors
+            # Update the positions of all the particles, the ones colliding will be at the same position
             vel = particle.velocity
             pos = particle.position
-            newPos = (pos + time*vel)
-            newPos = newPos + Decimal("1") if newPos < 0 else newPos
+            newPos = (pos + time*vel) % 1
+            if newPos < 0:
+                newPos += Decimal("1")
             particle.update(newPos=newPos)
         
-        particleIndices = []
+
         for index in collidingIndices:
             left, right = index
-            # ensure the collided particles are at the same position (because of floating point errors)
-            # self.particles[left].update(newPos=self.particles[right].position)
 
             # Update the velocities of the particles that have collided
             mass1 = self.particles[left].mass
@@ -190,38 +198,12 @@ class Sistem:
             self.particles[left].update(newVel=newVel1)
             self.particles[right].update(newVel=newVel2)
 
-            # Since the particles will get sorted, the list indexes will get changed and colParIndex becomes useless
-            # Save the actual particle indices
-            particleIndices.append((self.particles[left].index, self.particles[right].index))
-
         # Recalculate the energy and momentum
-
         self.momentum = sum([particle.mass * particle.velocity for particle in self.particles])
         self.energy = sum([Decimal("0.5") * particle.mass * particle.velocity**2 for particle in self.particles])
 
-        # Sort the particle list by position
-        self.particles.sort(key=lambda x: x.position)
-        
-        # For the particles that have just collided, check if the ordering is right
-        # First find the list index of the particles
-        leftListIndices = []
-        rightListIndices = []
-        for i in range(self.particleNum):
-            if self.particles[i].index in [index[0] for index in particleIndices]:
-                leftListIndices.append(i)
-            if self.particles[i].index in [index[1] for index in particleIndices]:
-                rightListIndices.append(i)
-        
-        for leftListIndex, rightListIndex in zip(leftListIndices, rightListIndices):
-            # Ensure the comparison goes right - left
-            if rightListIndex < leftListIndex:
-                leftListIndex, rightListIndex = rightListIndex, leftListIndex
-
-            if (self.particles[rightListIndex].index - self.particles[leftListIndex].index) % len(self.particles) == len(self.particles) - 1:
-                # switch the particles
-                particle1 = self.particles[rightListIndex]
-                particle2 = self.particles[leftListIndex]
-                self.particles[rightListIndex], self.particles[leftListIndex] = particle2, particle1
+        # Sort the particle list by their index
+        self.particles.sort(key=lambda x: x.index)
 
         self.indexes = [particle.index for particle in self.particles]
 
@@ -252,7 +234,8 @@ class Simulation:
         self.collisionNumber = collisionNumber
         self.sistem = Sistem(particleNum=particleNumber, masses=masses, initPositions=initPoss, initVelocities=initVels)
 
-    def run(self, shouldPrint=None):
+
+    def run(self, shouldPrint=None, shouldLog=None, filename=None):
         """
         This function collides the particles preset amount of times.
 
@@ -260,9 +243,22 @@ class Simulation:
             shouldPrint (list, optional): List of sistem object attributes you would like to have printed out. 
                                           Options are: 'positions', 'velocities', 'time', 'energy', 'momentum', 'indexes'.
                                           Defaults to None.
+            shouldLog (list, optional):
+            filename (string, optional): 
         """
-        for _ in range(self.collisionNumber):
+        if filename is not None:
+            f = open('Experiments/' + filename, 'w')
 
+            # Write down number of particles and their masses
+            massStr = ' '.join(str(mass) for mass in self.sistem.masses)
+
+            f.write(f'Number of particles is: {self.sistem.particleNum} | Masses: {massStr} \n')
+            
+            attributeStr = '|'.join(attribute for attribute in shouldLog)
+            f.write(attributeStr + '\n')
+
+        for _ in range(self.collisionNumber):
+            
             for attribute in shouldPrint:  # Just fancy pritting tools, not important to the physics
                 if hasattr(self.sistem, attribute):
                     values = getattr(self.sistem, attribute)
@@ -272,15 +268,32 @@ class Simulation:
                             print(f'{value:.2f}', end=' ')
                         print('', end='| ')
                     else:
-                        print(f'{attribute}:{getattr(self.sistem, attribute):e} |', end=' ')
+                        print(f'{attribute}:{getattr(self.sistem, attribute):.3f} |', end=' ')
 
             if shouldPrint is not None:
                 print('')
 
-            self.sistem.update_particles(self.sistem.time, self.sistem.collideIndices)
-            
+            if filename is not None:
+                for attribute in shouldLog:
+                    if hasattr(self.sistem, attribute):
+                        values = getattr(self.sistem, attribute)
+                        if isinstance(values, list):
+                            f.write(' '.join(str(value) for value in values) + '|')
+                        else:
+                            f.write(str(getattr(self.sistem, attribute)) + '|')
+                f.write('\n')
 
-Experiment1 = Simulation(collisionNumber=20, particleNumber=3, masses=[1, 1, 1], initPoss=[0.2, 0.5, 0.8], initVels=[1, 0, -1])
+            self.sistem.update_particles(self.sistem.time, self.sistem.collideIndices)
+
+        if filename is not None:
+            f.close()
+
+
+import time
+time1 = time.time()
+# Experiment1 = Simulation(collisionNumber=20, particleNumber=3, masses=[1, 1, 1], initPoss=[0.2, 0.5, 0.8], initVels=[1, 0, -1])
 # Experiment1 = Simulation(collisionNumber=10, particleNumber=4, masses=[1, 1, 1, 1], initPoss=[0.1, 0.4, 0.6, 0.9], initVels=[1, -1, 1, -1])
-# Experiment1 = Simulation(collisionNumber=20, particleNumber=3)
-Experiment1.run(shouldPrint=['positions', 'velocities', 'indexes'])
+Experiment1 = Simulation(collisionNumber=10, particleNumber=3)
+Experiment1.run(shouldPrint=['positions', 'velocities', 'indexes'], shouldLog=['positions', 'velocities'], filename='Test1')
+time2 = time.time()
+print(f'Elapsed time: {time2 - time1}s')
