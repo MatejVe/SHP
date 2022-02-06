@@ -205,8 +205,6 @@ class Sistem:
         # Sort the particle list by their index
         self.particles.sort(key=lambda x: x.index)
 
-        self.indexes = [particle.index for particle in self.particles]
-
         # Update the positions and velocities in the sistem class for purposes of logging them later
         self.positions = [particle.position for particle in self.particles]
         self.velocities = [particle.velocity for particle in self.particles]
@@ -243,8 +241,11 @@ class Simulation:
             shouldPrint (list, optional): List of sistem object attributes you would like to have printed out. 
                                           Options are: 'positions', 'velocities', 'time', 'energy', 'momentum', 'indexes'.
                                           Defaults to None.
-            shouldLog (list, optional):
-            filename (string, optional): 
+            shouldLog (list, optional): List of sistem object attributes you would like to have saved.
+                                        Options are: 'positions', 'velocities', 'time', 'energy', 'momentum', 'indexes'.
+                                        Defaults to None.
+            filename (string, optional): Path and the filename of where you want the shouldLog data saved. If using shouldLog
+                                        argument please provide the path as well.
         """
         if filename is not None:
             f = open(filename, 'w')
@@ -295,7 +296,7 @@ if __name__ == "__main__":
     time1 = time.time()
     # Experiment1 = Simulation(collisionNumber=20, particleNumber=3, masses=[1, 1, 1], initPoss=[0.2, 0.5, 0.8], initVels=[1, 0, -1])
     # Experiment1 = Simulation(collisionNumber=10, particleNumber=4, masses=[1, 1, 1, 1], initPoss=[0.1, 0.4, 0.6, 0.9], initVels=[1, -1, 1, -1])
-    Experiment1 = Simulation(collisionNumber=1000, particleNumber=3)
-    Experiment1.run(shouldLog=['positions', 'velocities'], filename='Test1')
+    Experiment1 = Simulation(collisionNumber=10, particleNumber=3)
+    Experiment1.run(shouldPrint=['positions', 'velocities'])
     time2 = time.time()
     print(f'Elapsed time: {time2 - time1}s')

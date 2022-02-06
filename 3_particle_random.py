@@ -5,7 +5,7 @@ print(os.getcwd())
 
 # Let's conduct a bunch of colliding experiments, with randomized positions and velocitites
 
-nSims = 100
+nSims = 10
 
 for i in range(nSims):
     experiment = Simulation(collisionNumber=10000, particleNumber=3)
