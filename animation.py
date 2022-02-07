@@ -8,7 +8,7 @@ plt.style.use('seaborn-pastel')
 
 
 # print(os.getcwd())  # C:\Users\matej\Desktop\Year 4 Stuff\Senior Honours Project\SHP
-f = open('Experiments/3_particles/random1')
+f = open('Experiments/3_particles/random9')
 positions = [[], [], []]
 velocities = [[], [], []]
 
@@ -67,7 +67,7 @@ colors = ['r', 'b', 'g']
 
 for i in range(3):
     circle = plt.Circle((positions[i][0], 0), 
-                        radius=D(0.03)*masses[i]/maxMass+D(0.02), 
+                        radius=D(0.01)*masses[i]/maxMass+D(0.005), 
                         color=colors[i])
     circles.append(circle)
     ax.add_patch(circle)
@@ -77,5 +77,5 @@ def animate(i):
         circles[j].set(center=(positions[j][i], 0))
     return circles
 
-anim = FuncAnimation(fig, animate, frames=10000, interval=20, blit=True)
+anim = FuncAnimation(fig, animate, frames=10000, interval=10, blit=True)
 plt.show()
