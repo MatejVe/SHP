@@ -8,7 +8,7 @@ plt.style.use('seaborn-pastel')
 
 
 # print(os.getcwd())  # C:\Users\matej\Desktop\Year 4 Stuff\Senior Honours Project\SHP
-f = open('Experiments/3_particles/random9')
+f = open('Experiments/3_particles/random0')
 positions = [[], [], []]
 velocities = [[], [], []]
 
@@ -57,25 +57,36 @@ for line in f.readlines():
     leftTime = time % ts
 f.close()
 
-fig = plt.figure(figsize=(10, 10))
+fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(10, 10))
 ax = plt.axes(xlim=(0,1), ylim=(-0.5,0.5))
-ax.get_yaxis().set_visible(False)
+axes[0].set_xlim(0, 1)
+axes[0].set_ylim(-0.25, 0.25)
+axes[0].get_yaxis().set_visible(False)
+axes[1].set_xlim(-3, 3)
+axes[1].set_ylim(-1, 1)
+axes[1].get_yaxis().set_visible(False)
 
 maxMass = max(masses)
 circles = []
 colors = ['r', 'b', 'g']
 
 for i in range(3):
-    circle = plt.Circle((positions[i][0], 0), 
+    circle1 = plt.Circle((positions[i][0], 0), 
                         radius=D(0.01)*masses[i]/maxMass+D(0.005), 
                         color=colors[i])
-    circles.append(circle)
-    ax.add_patch(circle)
+    circle2 = plt.Circle((velocities[i][0], 0),
+                        radius=D(0.01)*masses[i]/maxMass+D(0.01),
+                        color=colors[i])
+    circles.append(circle1)
+    circles.append(circle2)
+    axes[0].add_patch(circle1)
+    axes[1].add_patch(circle2)
 
 def animate(i):
     for j in range(3):
-        circles[j].set(center=(positions[j][i], 0))
+        circles[2*j].set(center=(positions[j][i], 0))
+        circles[2*j+1].set(center=(velocities[j][i], 0))
     return circles
 
-anim = FuncAnimation(fig, animate, frames=10000, interval=10, blit=True)
+anim = FuncAnimation(fig, animate, frames=10000, interval=20, blit=True)
 plt.show()

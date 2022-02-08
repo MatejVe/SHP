@@ -112,21 +112,21 @@ class Sistem:
 
         if masses == 'random':
             masses = np.random.random(size=particleNum) + 0.00001  # Adding a small constant to avoid assigning a mass of 0
-        elif not isinstance(masses, list):
+        elif not isinstance(masses, list) and not isinstance(masses, np.ndarray):
             raise Exception('Not a valid input for the masses, if not "random" the input has to be a list of masses!')
         elif len(masses) != particleNum:
             raise Exception('Differing amount of masses to the amount of particles was provided!')
 
         if initPositions == 'random':
             initPositions = np.sort(np.random.random(size=particleNum))  # Sort the array so that the nearest neighbors of a particle i are always particles (i+1) and (i-1)
-        elif not isinstance(initPositions, list):
+        elif not isinstance(initPositions, list) and not isinstance(initPositions, np.ndarray):
             raise Exception('Not a valid input for the masses, if no "random" the input has to be a list of positions!')
         elif len(initPositions) != particleNum:
             raise Exception('Differing amount of positions to the amount of particles was provided!')
 
         if initVelocities == 'random':
             initVelocities = 2*np.random.random(size=particleNum) - 1  # Initialize random velocities in the range [-1, 1)
-        elif not isinstance(initVelocities, list):
+        elif not isinstance(initVelocities, list) and not isinstance(initVelocities, np.ndarray):
             raise Exception('Not a valid input for the velocities, if not "random" the input has to be a list of velocities!')
         elif len(initVelocities) != particleNum:
             raise Exception('Differing amount of velocities to the amount of particles was provided!')

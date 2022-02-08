@@ -53,8 +53,6 @@
 - When three beads slide on a ring and collide with ellastic collisions, if their velocities are chosen carefully, they undergo periodic motion
 - Comparison of this problem to a geometric problem in billiard dynamics in a right-triangle
 
------------
-
 # Ideas on where to take the project
 
 ## Random strings idea
