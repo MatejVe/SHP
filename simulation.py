@@ -267,7 +267,10 @@ class Simulation:
                         if isinstance(values, list):
                             print(attribute + ':', end=' ')
                             for value in values:
-                                print(f'{value:.2f}', end=' ')
+                                if isinstance(value, tuple):
+                                    print(' '.join(str(item) for item in value), end=' ')
+                                else:
+                                    print(f'{value:.2f}', end=' ')
                             print('', end='| ')
                         else:
                             print(f'{attribute}:{getattr(self.sistem, attribute):.3f} |', end=' ')
@@ -280,7 +283,11 @@ class Simulation:
                     if hasattr(self.sistem, attribute):
                         values = getattr(self.sistem, attribute)
                         if isinstance(values, list):
-                            f.write(' '.join(str(value) for value in values) + '|')
+                            if isinstance(values[0], tuple):
+                                for value in values:
+                                    f.write(' '.join(str(item) for item in value))
+                            else:
+                                f.write(' '.join(str(value) for value in values) + '|')
                         else:
                             f.write(str(getattr(self.sistem, attribute)) + '|')
                 f.write('\n')
@@ -297,6 +304,6 @@ if __name__ == "__main__":
     # Experiment1 = Simulation(collisionNumber=20, particleNumber=3, masses=[1, 1, 1], initPoss=[0.2, 0.5, 0.8], initVels=[1, 0, -1])
     # Experiment1 = Simulation(collisionNumber=10, particleNumber=4, masses=[1, 1, 1, 1], initPoss=[0.1, 0.4, 0.6, 0.9], initVels=[1, -1, 1, -1])
     Experiment1 = Simulation(collisionNumber=10, particleNumber=3)
-    Experiment1.run(shouldPrint=['positions', 'velocities'])
+    Experiment1.run(shouldPrint=['positions', 'velocities', 'collideIndices'])
     time2 = time.time()
     print(f'Elapsed time: {time2 - time1}s')

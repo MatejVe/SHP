@@ -13,6 +13,6 @@ vels = np.append(vels, (-mass[0]*vels[0] - mass[1]*vels[1])/mass[2])
 nSims = 10
 
 for i in range(nSims):
-    experiment = Simulation(collisionNumber=1000000, particleNumber=3, masses=mass, initVels=vels)
-    filename = 'SHP/Experiments/3_particles/random' + str(i)
-    experiment.run(shouldLog=['time', 'positions', 'velocities'], filename=filename)
+    experiment = Simulation(collisionNumber=100000, particleNumber=3, masses=mass, initVels=vels)
+    filename = 'Experiments/3particlestrings/random' + str(i)
+    experiment.run(shouldLog=['collideIndices'], filename=filename)

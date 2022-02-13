@@ -1,9 +1,6 @@
-import os
 from decimal import Decimal as D
-import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
-from pandas import Interval
+import matplotlib.animation as animation
 plt.style.use('seaborn-pastel')
 
 
@@ -58,13 +55,15 @@ for line in f.readlines():
 f.close()
 
 fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(10, 10))
-ax = plt.axes(xlim=(0,1), ylim=(-0.5,0.5))
+# ax = plt.axes(xlim=(0,1), ylim=(-0.5,0.5))
 axes[0].set_xlim(0, 1)
 axes[0].set_ylim(-0.25, 0.25)
 axes[0].get_yaxis().set_visible(False)
+axes[0].set_title('Position Space')
 axes[1].set_xlim(-3, 3)
 axes[1].set_ylim(-1, 1)
 axes[1].get_yaxis().set_visible(False)
+axes[1].set_title('Velocity Space')
 
 maxMass = max(masses)
 circles = []
@@ -88,5 +87,12 @@ def animate(i):
         circles[2*j+1].set(center=(velocities[j][i], 0))
     return circles
 
-anim = FuncAnimation(fig, animate, frames=10000, interval=20, blit=True)
-plt.show()
+anim = animation.FuncAnimation(fig, animate, frames=500, interval=20, blit=True)
+anim.save('exampleCollisions.gif', writer='imagemagick', fps=30)
+# with open("myvideo.html", "w") as f:
+#     print(anim.to_html5_video(), file=f)
+# mywriter = animation.FFMpegWriter(fps=60)
+# anim.save('myanimation.mp4',writer=mywriter)
+# plt.show()
+plt.close()
+

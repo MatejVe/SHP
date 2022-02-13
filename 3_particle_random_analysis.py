@@ -1,61 +1,75 @@
-import numpy as np
-import seaborn as sns
 import matplotlib.pyplot as plt
-import os
 from decimal import Decimal as D
 
-print(os.getcwd())  # C:\Users\matej\Desktop\Year 4 Stuff\Senior Honours Project\SHP
+def convert_to_timestep(filepath):
+    f = open(filepath)
 
-f = open('Experiments/3_particles/random1')
-positions = [[], [], []]
-velocities = [[], [], []]
+    positions = [[], [], []]
+    velocities = [[], [], []]
 
-line1 = f.readline()
-masses = [D(mass) for mass in line1.split('|')[1].split(':')[1].strip().split(' ')]
+    line1 = f.readline()
+    masses = [D(mass) for mass in line1.split('|')[1].split(':')[1].strip().split(' ')]
 
-f.readline() # skip the second line of the file
+    f.readline() # skip the second line of the file
 
-init = f.readline()  # Read initial velocities and positions
+    init = f.readline()  # Read initial velocities and positions
 
-# Transform into timestep positions and velocities
-time = D(init.split('|')[0])
-prevPoss = [D(initPos) for initPos in init.split('|')[1].split(' ')]
-prevVels = [D(initVel) for initVel in init.split('|')[2].split(' ')]
-ts = D('0.01')  # Timestep will be 0.01
-
-for i in range(int(time // ts)):
-    for j in range(3):
-        newPos = (prevPoss[j] + (i+1)*ts*prevVels[j]) % 1
-        newPos = newPos + D('1') if newPos < 0 else newPos
-        positions[j].append(newPos)
-        velocities[j].append(prevVels[j])
-
-leftTime = time % ts
-
-for line in f.readlines():
-    time, poss, vels = line.split('|')[:3]
-    time = D(time)
-    poss = [D(pos) for pos in poss.split(' ')]
-    vels = [D(vel) for vel in vels.split(' ')]
-
-    for i in range(3): # Sort the weird time step
-        newPos = (poss[i] + (ts - leftTime)*vels[i]) % 1
-        newPos = newPos + D('1') if newPos < 0 else newPos
-        positions[i].append(newPos)
-        velocities[i].append(vels[i])
-    time = time - (ts - leftTime)
+    # Transform into timestep positions and velocities
+    time = D(init.split('|')[0])
+    prevPoss = [D(initPos) for initPos in init.split('|')[1].split(' ')]
+    prevVels = [D(initVel) for initVel in init.split('|')[2].split(' ')]
+    ts = D('0.01')  # Timestep will be 0.01
 
     for i in range(int(time // ts)):
         for j in range(3):
-            newPos = (poss[j] + (i+1)*ts*vels[j] + (ts - leftTime)*vels[j]) % 1
+            newPos = (prevPoss[j] + (i+1)*ts*prevVels[j]) % 1
             newPos = newPos + D('1') if newPos < 0 else newPos
             positions[j].append(newPos)
-            velocities[j].append(vels[j])
+            velocities[j].append(prevVels[j])
 
     leftTime = time % ts
-f.close()
 
-sns.histplot(x=positions[0], kde=True, bins=100, stat='density', color='blue')
-sns.histplot(x=positions[1], kde=True, bins=100, stat='density', color='red')
-sns.histplot(x=positions[2], kde=True, bins=100, stat='density', color='green')
+    for line in f.readlines():
+        time, poss, vels = line.split('|')[:3]
+        time = D(time)
+        poss = [D(pos) for pos in poss.split(' ')]
+        vels = [D(vel) for vel in vels.split(' ')]
+
+        for i in range(3): # Sort the weird time step
+            newPos = (poss[i] + (ts - leftTime)*vels[i]) % 1
+            newPos = newPos + D('1') if newPos < 0 else newPos
+            positions[i].append(newPos)
+            velocities[i].append(vels[i])
+        time = time - (ts - leftTime)
+
+        for i in range(int(time // ts)):
+            for j in range(3):
+                newPos = (poss[j] + (i+1)*ts*vels[j] + (ts - leftTime)*vels[j]) % 1
+                newPos = newPos + D('1') if newPos < 0 else newPos
+                positions[j].append(newPos)
+                velocities[j].append(vels[j])
+
+        leftTime = time % ts
+    f.close()
+
+    return masses, positions, velocities
+
+masses, positions, velocities = convert_to_timestep('Experiments/3_particles/random0')
+
+fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(10, 10))
+
+axes[0].set_title('Position probability distributions')
+axes[0].set_xlim(0, 1)
+axes[0].hist(x=positions[0], color='blue', bins=500, histtype='step', density=True)
+axes[0].hist(x=positions[1], color='red', bins=500, histtype='step', density=True)
+axes[0].hist(x=positions[2], color='green', bins=500, histtype='step', density=True)
+axes[0].legend(labels=["Particle 0", "Particle 1", "Particle 2"])
+
+axes[1].set_title('Velocity probability distributions')
+axes[1].hist(x=velocities[0], color='blue', bins=500, histtype='step', density=True)
+axes[1].hist(x=velocities[1], color='red', bins=500, histtype='step', density=True)
+axes[1].hist(x=velocities[2], color='green', bins=500, histtype='step', density=True)
+axes[1].legend(labels=["Particle 0", "Particle 1", "Particle 2"])
+
+plt.savefig('3particles_distribution0')
 plt.show()
