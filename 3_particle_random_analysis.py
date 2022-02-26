@@ -54,22 +54,23 @@ def convert_to_timestep(filepath):
 
     return masses, positions, velocities
 
-masses, positions, velocities = convert_to_timestep('Experiments/3_particles/random0')
+for i in range(10):
+    masses, positions, velocities = convert_to_timestep('Experiments/3_particles/random' + str(i))
 
-fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(10, 10))
+    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(10, 10))
 
-axes[0].set_title('Position probability distributions')
-axes[0].set_xlim(0, 1)
-axes[0].hist(x=positions[0], color='blue', bins=500, histtype='step', density=True)
-axes[0].hist(x=positions[1], color='red', bins=500, histtype='step', density=True)
-axes[0].hist(x=positions[2], color='green', bins=500, histtype='step', density=True)
-axes[0].legend(labels=["Particle 0", "Particle 1", "Particle 2"])
+    axes[0].set_title('Position probability distributions')
+    axes[0].set_xlim(0, 1)
+    axes[0].hist(x=positions[0], color='blue', bins=1000, histtype='step', density=True)
+    axes[0].hist(x=positions[1], color='red', bins=1000, histtype='step', density=True)
+    axes[0].hist(x=positions[2], color='green', bins=1000, histtype='step', density=True)
+    axes[0].legend(labels=["Particle 0", "Particle 1", "Particle 2"])
 
-axes[1].set_title('Velocity probability distributions')
-axes[1].hist(x=velocities[0], color='blue', bins=500, histtype='step', density=True)
-axes[1].hist(x=velocities[1], color='red', bins=500, histtype='step', density=True)
-axes[1].hist(x=velocities[2], color='green', bins=500, histtype='step', density=True)
-axes[1].legend(labels=["Particle 0", "Particle 1", "Particle 2"])
+    axes[1].set_title('Velocity probability distributions')
+    axes[1].hist(x=velocities[0], color='blue', bins=1000, histtype='step', density=True)
+    axes[1].hist(x=velocities[1], color='red', bins=1000, histtype='step', density=True)
+    axes[1].hist(x=velocities[2], color='green', bins=1000, histtype='step', density=True)
+    axes[1].legend(labels=["Particle 0", "Particle 1", "Particle 2"])
 
-plt.savefig('3particles_distribution0')
-plt.show()
+    plt.savefig('Plots/Phase_space_distributions/3particles_distribution' + str(i))
+    plt.close()

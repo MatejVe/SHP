@@ -239,10 +239,10 @@ class Simulation:
 
         Args:
             shouldPrint (list, optional): List of sistem object attributes you would like to have printed out. 
-                                          Options are: 'positions', 'velocities', 'time', 'energy', 'momentum', 'indexes'.
+                                          Options are: 'positions', 'velocities', 'time', 'energy', 'momentum', 'indexes', 'collideIndices'.
                                           Defaults to None.
             shouldLog (list, optional): List of sistem object attributes you would like to have saved.
-                                        Options are: 'positions', 'velocities', 'time', 'energy', 'momentum', 'indexes'.
+                                        Options are: 'positions', 'velocities', 'time', 'energy', 'momentum', 'indexes', 'collideIndices'.
                                         Defaults to None.
             filename (string, optional): Path and the filename of where you want the shouldLog data saved. If using shouldLog
                                         argument please provide the path as well.

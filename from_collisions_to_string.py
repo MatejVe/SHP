@@ -51,4 +51,26 @@ def entropy2(labels, base=None):
 
   return ent
 
-print(entropy2([s for s in string]))
+
+import sys
+import zlib
+
+# Checking size of text
+text_size=sys.getsizeof(string)
+print("\nsize of original text",text_size)
+
+# Compressing text
+compressed = zlib.compress(string.encode())
+
+# Checking size of text after compression
+csize=sys.getsizeof(compressed)
+print("\nsize of compressed text",csize)
+
+# Decompressing text
+decompressed=zlib.decompress(compressed)
+
+#Checking size of text after decompression
+dsize=sys.getsizeof(decompressed)
+print("\nsize of decompressed text",dsize)
+
+print("\nDifference of size= ", text_size-csize)
