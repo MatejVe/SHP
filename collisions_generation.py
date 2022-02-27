@@ -6,14 +6,19 @@ import numpy as np
 
 # Let's conduct a bunch of colliding experiments, with randomized positions and velocitites
 # Velocities are such that the total momentum ends up being zero
-mass = np.random.random(3)
 
-nSims = 10
+# mass = np.random.random(3) # tried with same mass, maybe changing it will change the results
 
-for i in range(nSims):
-    vels = 2*np.random.random(2) - 1
-    vels = np.append(vels, (-mass[0]*vels[0] - mass[1]*vels[1])/mass[2])
+nSizes = 10
 
-    experiment = Simulation(collisionNumber=100000*(i+1), particleNumber=3, masses=mass, initVels=vels)
-    filename = 'Experiments/3particlestrings/random' + str(i)
-    experiment.run(shouldLog=['collideIndices'], filename=filename)
+nSims = 100
+
+for i in range(nSizes):
+    for j in range(nSims):
+        mass = np.random.random(3)
+        vels = 2*np.random.random(2) - 1
+        vels = np.append(vels, (-mass[0]*vels[0] - mass[1]*vels[1])/mass[2])
+
+        experiment = Simulation(collisionNumber=100000*(i+1), particleNumber=3, masses=mass, initVels=vels)
+        filename = 'Experiments/3particlestrings/random' + str(i)
+        experiment.run(shouldLog=['collideIndices'], filename=filename)

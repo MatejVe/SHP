@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-import zlib
+import bz2
 
 def convert_to_string(filepath):
     """Only use on files that strictly contain collide indices."""
@@ -50,12 +50,12 @@ generated_sizes = [sys.getsizeof(string) for string in generated_strings]
 random_sizes = [sys.getsizeof(string) for string in random_strings]
 
 # find compresed sizes
-compressed_generated = [sys.getsizeof(zlib.compress(string.encode())) for string in generated_strings]
-compressed_random = [sys.getsizeof(zlib.compress(string.encode())) for string in random_strings]
+compressed_generated = [sys.getsizeof(bz2.compress(string.encode())) for string in generated_strings]
+compressed_random = [sys.getsizeof(bz2.compress(string.encode())) for string in random_strings]
 
 # find the compression percentage
-percentage_generated = [round(gen_comp/gen, 3) for gen_comp, gen in zip(compressed_generated, generated_sizes)]
-percentage_random = [round(rand_comp/rand, 3) for rand_comp, rand in zip(compressed_random, random_sizes)]
+percentage_generated = [round(gen/gen_comp, 2) for gen_comp, gen in zip(compressed_generated, generated_sizes)]
+percentage_random = [round(rand/rand_comp, 2) for rand_comp, rand in zip(compressed_random, random_sizes)]
 
 lengths = [len(string) for string in generated_strings]
 
@@ -72,7 +72,7 @@ ax.set_ylabel('Compression ratio')
 ax.set_title('Compression ratio by length, \nseparated into collisions generated strings and random generated strings.')
 ax.set_xlabel('String length')
 ax.set_xticks(x, labels)
-ax.set_ylim(0, 0.2)
+# ax.set_ylim(0, 0.2)
 ax.legend()
 
 ax.bar_label(rects1, padding=3)
@@ -80,5 +80,5 @@ ax.bar_label(rects2, padding=3)
 
 fig.tight_layout()
 
-plt.savefig('Plots/comparison_graphs/compression_comparison')
+plt.savefig('Plots/comparison_graphs/compression_bz2_comparison')
 plt.close()
