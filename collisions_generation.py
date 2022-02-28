@@ -11,7 +11,7 @@ import numpy as np
 
 nSizes = 10
 
-nSims = 100
+nSims = 20
 
 for i in range(nSizes):
     for j in range(nSims):
@@ -20,5 +20,5 @@ for i in range(nSizes):
         vels = np.append(vels, (-mass[0]*vels[0] - mass[1]*vels[1])/mass[2])
 
         experiment = Simulation(collisionNumber=100000*(i+1), particleNumber=3, masses=mass, initVels=vels)
-        filename = 'Experiments/3particlestrings/random' + str(i)
+        filename = 'Experiments/3particlestrings/size' + str(100000*(i+1)) + '_' + str(j)
         experiment.run(shouldLog=['collideIndices'], filename=filename)
