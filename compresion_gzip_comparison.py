@@ -34,33 +34,41 @@ def convert_to_string(filepath):
 
 # I chose to do experiments with 10 different sizes, arranged in 100000*(i+1) and within each size 20 experiments
 
-generated_strings = []
-for i in range(10):
-    single_size_strings = []
-    for j in range(20):
-        single_size_strings.append(convert_to_string('Experiments/3particlestrings/size' + str(100000*(i+1)) + '_' + str(j)))
-
-    generated_strings.append(single_size_strings)
-
 lengths = [100000*(i+1) for i in range(10)]
 
-random_strings = []
+generated_sizes = []
+compressed_generated = []
+for i in range(10):
+    gen_sized = []
+    comp_gen_sized = []
+    for j in range(40):
+        string = convert_to_string('Experiments/3particlestrings/size' + str(100000*(i+1)) + '_' + str(j))
+        size = sys.getsizeof(string.encode())
+        comp_size = sys.getsizeof(zlib.compress(string.encode()))
+
+        gen_sized.append(size)
+        comp_gen_sized.append(comp_size)
+
+    generated_sizes.append(gen_sized)
+    compressed_generated.append(comp_gen_sized)
+
+
+random_sizes = []
+compressed_random = []
 for length in lengths:
-    single_size_strings = []
-    for j in range(20):
+    rand_sized = []
+    comp_rand_sized = []
+    for j in range(40):
         random = np.random.randint(0, 2, size=length)
-        random = [str(r) for r in random]
+        random = ''.join([str(r) for r in random])
+        size = sys.getsizeof(random.encode())
+        comp_size = sys.getsizeof(zlib.compress(random.encode()))
 
-        single_size_strings.append(''.join(random))
-    random_strings.append(single_size_strings)
-
-# find original size
-generated_sizes = [[sys.getsizeof(string) for string in sized] for sized in generated_strings]
-random_sizes = [[sys.getsizeof(string) for string in sized] for sized in random_strings]
-
-# find compresed sizes
-compressed_generated = [[sys.getsizeof(zlib.compress(string.encode())) for string in sized] for sized in generated_strings]
-compressed_random = [[sys.getsizeof(zlib.compress(string.encode())) for string in sized] for sized in random_strings]
+        rand_sized.append(size)
+        comp_rand_sized.append(comp_size)
+    
+    random_sizes.append(rand_sized)
+    compressed_random.append(comp_rand_sized)
 
 # Find means and stds
 gen_size_means = [np.mean(sized) for sized in generated_sizes]

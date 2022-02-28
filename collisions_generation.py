@@ -11,7 +11,7 @@ import numpy as np
 
 nSizes = 10
 
-nSims = 20
+nSims = 40
 
 for i in range(nSizes):
     for j in range(nSims):

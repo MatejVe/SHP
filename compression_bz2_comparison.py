@@ -32,41 +32,66 @@ def convert_to_string(filepath):
         crnt = next
     return string
 
-generated_strings = []
+lengths = [100000*(i+1) for i in range(10)]
+
+generated_sizes = []
+compressed_generated = []
 for i in range(10):
-    generated_strings.append(convert_to_string('Experiments/3particlestrings/random' + str(i)))
+    gen_sized = []
+    comp_gen_sized = []
+    for j in range(40):
+        string = convert_to_string('Experiments/3particlestrings/size' + str(100000*(i+1)) + '_' + str(j))
+        size = sys.getsizeof(string.encode())
+        comp_size = sys.getsizeof(bz2.compress(string.encode()))
 
-lengths = [len(string) for string in generated_strings]
+        gen_sized.append(size)
+        comp_gen_sized.append(comp_size)
 
-random_strings = []
+    generated_sizes.append(gen_sized)
+    compressed_generated.append(comp_gen_sized)
+
+
+random_sizes = []
+compressed_random = []
 for length in lengths:
-    random = np.random.randint(0, 2, size=length)
-    random = [str(r) for r in random]
+    rand_sized = []
+    comp_rand_sized = []
+    for j in range(40):
+        random = np.random.randint(0, 2, size=length)
+        random = ''.join([str(r) for r in random])
+        size = sys.getsizeof(random.encode())
+        comp_size = sys.getsizeof(bz2.compress(random.encode()))
 
-    random_strings.append(''.join(random))
+        rand_sized.append(size)
+        comp_rand_sized.append(comp_size)
+    
+    random_sizes.append(rand_sized)
+    compressed_random.append(comp_rand_sized)
 
-# find original sizes
-generated_sizes = [sys.getsizeof(string) for string in generated_strings]
-random_sizes = [sys.getsizeof(string) for string in random_strings]
+# Find means and stds
+gen_size_means = [np.mean(sized) for sized in generated_sizes]
+rand_size_means = [np.mean(sized) for sized in random_sizes]
 
-# find compresed sizes
-compressed_generated = [sys.getsizeof(bz2.compress(string.encode())) for string in generated_strings]
-compressed_random = [sys.getsizeof(bz2.compress(string.encode())) for string in random_strings]
+gen_comp_means = [np.mean(sized) for sized in compressed_generated]
+rand_comp_means = [np.mean(sized) for sized in compressed_random]
 
-# find the compression percentage
-percentage_generated = [round(gen/gen_comp, 2) for gen_comp, gen in zip(compressed_generated, generated_sizes)]
-percentage_random = [round(rand/rand_comp, 2) for rand_comp, rand in zip(compressed_random, random_sizes)]
+percentage_generated = [[round(gen/gen_comp, 2) for gen_comp in sized] for gen, sized in zip(gen_size_means, compressed_generated)]
+percentage_random = [[round(rand/rand_comp, 2) for rand_comp in sized] for rand, sized in zip(rand_size_means, compressed_random)]
 
-lengths = [len(string) for string in generated_strings]
+perc_gen_means = [round(np.mean(size), 2) for size in percentage_generated]
+perc_gen_stds = [np.std(size) for size in percentage_generated]  # TODO: update std with a different method, e.g. jackknife sampling
+
+perc_rand_means = [round(np.mean(size), 2) for size in percentage_random]
+perc_rand_stds = [np.std(size) for size in percentage_random]
 
 fig, ax = plt.subplots(figsize=(10, 10))
-labels = [str(length + 1) for length in lengths]
+labels = [str(length) for length in lengths]
 
 x = np.arange(len(labels))
 width= 0.35
 
-rects1 = ax.bar(x - width/2, percentage_generated, width, label='Compression ratio \nof generated strings')
-rects2 = ax.bar(x + width/2, percentage_random, width, label='Compression ratio \nof random strings')
+rects1 = ax.bar(x - width/2, perc_gen_means, width, yerr=perc_gen_stds, label='Compression ratio \nof generated strings')
+rects2 = ax.bar(x + width/2, perc_rand_means, width, yerr=perc_rand_stds, label='Compression ratio \nof random strings')
 
 ax.set_ylabel('Compression ratio')
 ax.set_title('Compression ratio by length, \nseparated into collisions generated strings and random generated strings.')
