@@ -1,4 +1,6 @@
+from decimal import DivisionByZero
 import numpy as np
+import math
 
 def convert_to_string(filepath):
     """Only use on files that strictly contain collide indices."""
@@ -41,3 +43,26 @@ def jacknife_error(data):
         
     error = np.sqrt(np.sum(errors))
     return error
+
+def runsTest(string):
+    runs, n1, n2 = 0, 0, 0
+
+    for i in range(1, len(string)):
+        if (string[i] == '1' and string[i-1] == '0') or \
+            (string[i] == '0' and string[i-1] == '1'):
+            runs += 1
+
+        if string[i] == '1':
+            n1 += 1
+        else:
+            n2 += 1
+
+    runs_exp = ((2*n1*n2)/(n1+n2))+1
+    stan_dev = math.sqrt((2*n1*n2*(2*n1*n2-n1-n2))/ \
+                       (((n1+n2)**2)*(n1+n2-1)))
+    
+    try:
+        z = (runs-runs_exp)/stan_dev
+        return z
+    except ZeroDivisionError:
+        print(f'Division by zero, n1={n1}, n2={n2}.')

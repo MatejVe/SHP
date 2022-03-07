@@ -56,7 +56,7 @@ def convert_to_timestep(filepath):
 
     return masses, positions, velocities
 
-masses, positions, velocities = convert_to_timestep('Experiments/3_particles/size100000_0')
+masses, positions, velocities = convert_to_timestep('Experiments/3_particles/size100000_1')
 
 fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(10, 10))
 # ax = plt.axes(xlim=(0,1), ylim=(-0.5,0.5))
@@ -91,7 +91,7 @@ def animate(i):
         circles[2*j+1].set(center=(velocities[j][i], 0))
     return circles
 
-anim = animation.FuncAnimation(fig, animate, frames=1000, interval=50, blit=True)
+anim = animation.FuncAnimation(fig, animate, frames=1000, interval=500, blit=True)
 anim.save('exampleCollisions.gif', writer='imagemagick', fps=30)
 plt.close()
 
