@@ -69,7 +69,7 @@ rects1 = ax.bar(x - width/2, perc_gen_means, width, yerr=perc_gen_stds, label='C
 rects2 = ax.bar(x + width/2, perc_rand_means, width, yerr=perc_rand_stds, label='Compression ratio \nof random strings')
 
 ax.set_ylabel('Compression ratio')
-ax.set_title('Compression ratio by length, \nseparated into collisions generated strings and random generated strings.')
+ax.set_title('Compression ratio by length, uncompressed/compressed, gzip \nseparated into collisions generated strings and random generated strings.')
 ax.set_xlabel('String length')
 ax.set_xticks(x, labels)
 # ax.set_ylim(0, 0.2)
