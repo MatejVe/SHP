@@ -177,8 +177,8 @@ rand_size_means = [np.mean(sized) for sized in random_sizes]
 gen_comp_means = [np.mean(sized) for sized in compressed_generated]
 rand_comp_means = [np.mean(sized) for sized in compressed_random]
 
-percentage_generated = [[round(gen/gen_comp, 2) for gen_comp in sized] for gen, sized in zip(gen_size_means, compressed_generated)]
-percentage_random = [[round(rand/rand_comp, 2) for rand_comp in sized] for rand, sized in zip(rand_size_means, compressed_random)]
+percentage_generated = [[round(gen_comp/gen, 2) for gen_comp in sized] for gen, sized in zip(gen_size_means, compressed_generated)]
+percentage_random = [[round(rand_comp/rand, 2) for rand_comp in sized] for rand, sized in zip(rand_size_means, compressed_random)]
 
 perc_gen_means = [round(np.mean(size), 2) for size in percentage_generated]
 perc_gen_stds = [jacknife_error(size) for size in percentage_generated]
@@ -197,10 +197,10 @@ rects1 = ax.bar(x - width/2, perc_gen_means, width, yerr=perc_gen_stds, label='C
 rects2 = ax.bar(x + width/2, perc_rand_means, width, yerr=perc_rand_stds, label='Compression ratio \nof random strings')
 
 ax.set_ylabel('Compression ratio')
-ax.set_title('Compression ratio by length, uncompressed/compressed, custom algorithm \nseparated into collisions generated strings and random generated strings.')
+ax.set_title('Compression ratio by length, compressed/uncompressed, custom algorithm \nseparated into collisions generated strings and random generated strings.')
 ax.set_xlabel('String length')
 ax.set_xticks(x, labels)
-# ax.set_ylim(0, 0.2)
+ax.set_ylim(0, 1.2)
 ax.legend()
 
 ax.bar_label(rects1, padding=3)
