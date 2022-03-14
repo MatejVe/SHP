@@ -9,11 +9,11 @@ import numpy as np
 
 # mass = np.random.random(3) # tried with same mass, maybe changing it will change the results
 
-nSizes = 10
+sizes = np.logspace(2, 7, 6)
 
 nSims = 40
 
-for i in range(nSizes):
+for i in range(len(sizes)):
     for j in range(nSims):
         mass = np.random.random(3)
         vels = 2*np.random.random(2) - 1
@@ -21,11 +21,11 @@ for i in range(nSizes):
         poss = np.random.random(3)
 
         # Save the collision indices
-        experiment = Simulation(collisionNumber=100000*(i+1), particleNumber=3, masses=mass, initVels=vels, initPoss=poss)
-        filename = 'Experiments/3particlestrings/size' + str(100000*(i+1)) + '_' + str(j)
+        experiment = Simulation(collisionNumber=int(sizes[i]+1), particleNumber=3, masses=mass, initVels=vels, initPoss=poss)
+        filename = 'Experiments/3particlestrings/size' + str(int(sizes[i])) + '_' + str(j)
         experiment.run(shouldLog=['collideIndices'], filename=filename)
 
         # Save the first few position and velocity data so we can see what is going on
         experiment = Simulation(collisionNumber=10000, particleNumber=3, masses=mass, initVels=vels, initPoss=poss)
-        filename = 'Experiments/3_particles/size' + str(100000*(i+1)) + '_' + str(j)
+        filename = 'Experiments/3_particles/size' + str(sizes[i]) + '_' + str(j)
         experiment.run(shouldLog=['time', 'positions', 'velocities'], filename=filename)

@@ -54,10 +54,10 @@ def convert_to_timestep(filepath):
 
     return masses, positions, velocities
 
-for i in range(10):
+for i in range(2, 10):
     masses, positions, velocities = convert_to_timestep('Experiments/3_particles/random' + str(i))
 
-    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(10, 10))
+    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(12, 8))
 
     axes[0].set_title('Position probability distributions')
     axes[0].set_xlim(0, 1)

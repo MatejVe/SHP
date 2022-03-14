@@ -4,15 +4,16 @@ import sys
 import bz2
 from auxiliary import *
 
-lengths = [100000*(i+1) for i in range(10)]
+sizes = np.logspace(2, 7, 6)
+nSims = 40
 
 generated_sizes = []
 compressed_generated = []
-for i in range(10):
+for i in range(len(sizes)):
     gen_sized = []
     comp_gen_sized = []
-    for j in range(40):
-        string = convert_to_string('Experiments/3particlestrings/size' + str(100000*(i+1)) + '_' + str(j))
+    for j in range(nSims):
+        string = convert_to_string('Experiments/3particlestrings/size' + str(int(sizes[i])) + '_' + str(j))
         size = sys.getsizeof(string.encode())
         comp_size = sys.getsizeof(bz2.compress(string.encode()))
 
@@ -22,13 +23,14 @@ for i in range(10):
     generated_sizes.append(gen_sized)
     compressed_generated.append(comp_gen_sized)
 
+lengths = [int(size) for size in sizes]
 
 random_sizes = []
 compressed_random = []
 for length in lengths:
     rand_sized = []
     comp_rand_sized = []
-    for j in range(40):
+    for j in range(nSims):
         random = np.random.randint(0, 2, size=length)
         random = ''.join([str(r) for r in random])
         size = sys.getsizeof(random.encode())
@@ -51,12 +53,12 @@ percentage_generated = [[round(gen/gen_comp, 2) for gen_comp in sized] for gen, 
 percentage_random = [[round(rand/rand_comp, 2) for rand_comp in sized] for rand, sized in zip(rand_size_means, compressed_random)]
 
 perc_gen_means = [round(np.mean(size), 2) for size in percentage_generated]
-perc_gen_stds = [jacknife_error(size) for size in percentage_generated]  # TODO: update std with a different method, e.g. jackknife sampling
+perc_gen_stds = [jacknife_error(size) for size in percentage_generated]
 
 perc_rand_means = [round(np.mean(size), 2) for size in percentage_random]
 perc_rand_stds = [jacknife_error(size) for size in percentage_random]
 
-fig, ax = plt.subplots(figsize=(10, 10))
+fig, ax = plt.subplots(figsize=(12, 8))
 labels = [str(length) for length in lengths]
 
 x = np.arange(len(labels))

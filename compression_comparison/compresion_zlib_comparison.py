@@ -6,15 +6,16 @@ from auxiliary import *
 
 # I chose to do experiments with 10 different sizes, arranged in 100000*(i+1) and within each size 20 experiments
 
-lengths = [100000*(i+1) for i in range(10)]
+sizes = np.logspace(2, 7, 6)
+nSims = 40
 
 generated_sizes = []
 compressed_generated = []
-for i in range(10):
+for i in range(len(sizes)):
     gen_sized = []
     comp_gen_sized = []
-    for j in range(40):
-        string = convert_to_string('Experiments/3particlestrings/size' + str(100000*(i+1)) + '_' + str(j))
+    for j in range(nSims):
+        string = convert_to_string('Experiments/3particlestrings/size' + str(int(sizes[i])) + '_' + str(j))
         size = sys.getsizeof(string.encode())
         comp_size = sys.getsizeof(zlib.compress(string.encode()))
 
@@ -24,6 +25,7 @@ for i in range(10):
     generated_sizes.append(gen_sized)
     compressed_generated.append(comp_gen_sized)
 
+lengths = [int(size) for size in sizes]
 
 random_sizes = []
 compressed_random = []
@@ -59,7 +61,7 @@ perc_rand_means = [round(np.mean(size), 2) for size in percentage_random]
 perc_rand_stds = [jacknife_error(size) for size in percentage_random]
 
 
-fig, ax = plt.subplots(figsize=(10, 10))
+fig, ax = plt.subplots(figsize=(12, 8))
 labels = [str(length) for length in lengths]
 
 x = np.arange(len(labels))
@@ -69,7 +71,7 @@ rects1 = ax.bar(x - width/2, perc_gen_means, width, yerr=perc_gen_stds, label='C
 rects2 = ax.bar(x + width/2, perc_rand_means, width, yerr=perc_rand_stds, label='Compression ratio \nof random strings')
 
 ax.set_ylabel('Compression ratio')
-ax.set_title('Compression ratio by length, uncompressed/compressed, gzip \nseparated into collisions generated strings and random generated strings.')
+ax.set_title('Compression ratio by length, uncompressed/compressed, zlib \nseparated into collisions generated strings and random generated strings.')
 ax.set_xlabel('String length')
 ax.set_xticks(x, labels)
 # ax.set_ylim(0, 0.2)
@@ -80,5 +82,5 @@ ax.bar_label(rects2, padding=3)
 
 fig.tight_layout()
 
-plt.savefig('Plots/comparison_graphs/compression_gzip_comparison')
+plt.savefig('Plots/comparison_graphs/compression_zlib_comparison')
 plt.close()
