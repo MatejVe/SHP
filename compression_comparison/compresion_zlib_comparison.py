@@ -32,7 +32,7 @@ compressed_random = []
 for length in lengths:
     rand_sized = []
     comp_rand_sized = []
-    for j in range(40):
+    for j in range(nSims):
         random = np.random.randint(0, 2, size=length)
         random = ''.join([str(r) for r in random])
         size = sys.getsizeof(random.encode())
