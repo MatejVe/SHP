@@ -212,7 +212,7 @@ def entropy2(labels, base=None):
     ent = 0.
 
     # Compute entropy
-    base = math.e if base is None else base
+    base = e if base is None else base
     for i in probs:
         ent -= i * math.log(i, base)
 

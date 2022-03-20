@@ -78,10 +78,10 @@ rand_ent = [round(np.mean([e for e in group]), 2) for group in entropy_random]
 rand_ent_errs = [jacknife_error(group) for group in entropy_random]
 
 ax = axes[0][0]
-rects1 = ax.bar(x - width/2, gen_ent, width, yerr=gen_ent_errs, label='Entropy of collision generated strings')
-rects2 = ax.bar(x + width/2, rand_ent, width, yerr=rand_ent_errs, label='Entropy of random generated strings')
+rects1 = ax.bar(x - width/2, gen_ent, width, yerr=gen_ent_errs, label='Collision generated strings')
+rects2 = ax.bar(x + width/2, rand_ent, width, yerr=rand_ent_errs, label='Random strings')
 ax.set_ylabel('Entropy [bits]')
-ax.set_title('Entropy by string length, separated into collisions generated and random generated strings.')
+ax.set_title('Entropy by string length')
 ax.set_xlabel('String length')
 ax.set_xticks(x, labels)
 ax.set_ylim(0, 1.2)
@@ -94,13 +94,13 @@ zlib_gen_perc = [round(i, 2) for i in zlib_gen_perc]
 zlib_rand_perc, zlib_rand_errs = percentage_and_error(rand_sizes, zlib_random)
 zlib_rand_perc = [round(i, 2) for i in zlib_rand_perc]
 ax = axes[0][1]
-rects1 = ax.bar(x - width/2, zlib_gen_perc, width, yerr=zlib_gen_errs, label='Compression ratio \nof generated strings')
-rects2 = ax.bar(x + width/2, zlib_rand_perc, width, yerr=zlib_rand_errs, label='Compression ratio \nof random strings')
-ax.set_ylabel('Compression ratio')
-ax.set_title('Compression ratio by length, uncompressed/compressed, zlib \nseparated into collisions generated strings and random generated strings.')
+rects1 = ax.bar(x - width/2, zlib_gen_perc, width, yerr=zlib_gen_errs, label='Collision generated strings')
+rects2 = ax.bar(x + width/2, zlib_rand_perc, width, yerr=zlib_rand_errs, label='Random strings')
+ax.set_ylabel('Compression percentage')
+ax.set_title('Compression percentage by length, \n zlib compression algorithm')
 ax.set_xlabel('String length')
 ax.set_xticks(x, labels)
-ax.set_ylim(0, 1.2)
+ax.set_ylim(0, 0.8)
 ax.legend()
 ax.bar_label(rects1, padding=3)
 ax.bar_label(rects2, padding=3)
@@ -110,13 +110,13 @@ bz2_gen_perc = [round(i, 2) for i in bz2_gen_perc]
 bz2_rand_perc, bz2_rand_errs = percentage_and_error(rand_sizes, bz2_random)
 bz2_rand_perc = [round(i, 2) for i in bz2_rand_perc]
 ax = axes[1][0]
-rects1 = ax.bar(x - width/2, bz2_gen_perc, width, yerr=bz2_gen_errs, label='Compression ratio \nof generated strings')
-rects2 = ax.bar(x + width/2, bz2_rand_perc, width, yerr=bz2_rand_errs, label='Compression ratio \nof random strings')
-ax.set_ylabel('Compression ratio')
-ax.set_title('Compression ratio by length, uncompressed/compressed, bz2 algorithm \nseparated into collisions generated strings and random generated strings.')
+rects1 = ax.bar(x - width/2, bz2_gen_perc, width, yerr=bz2_gen_errs, label='Collision generated strings')
+rects2 = ax.bar(x + width/2, bz2_rand_perc, width, yerr=bz2_rand_errs, label='Random strings')
+ax.set_ylabel('Compression percentage')
+ax.set_title('Compression percentage by length, \n bz2 compression algorithm')
 ax.set_xlabel('String length')
 ax.set_xticks(x, labels)
-ax.set_ylim(0, 1.2)
+ax.set_ylim(0, 1)
 ax.legend()
 ax.bar_label(rects1, padding=3)
 ax.bar_label(rects2, padding=3)
@@ -126,10 +126,10 @@ encoder_gen_perc, encoder_gen_errs = percentage_and_error(generated_sizes, encod
 encoder_gen_perc = [round(i, 2) for i in encoder_gen_perc]
 encoder_rand_perc, encoder_rand_errs = percentage_and_error(rand_sizes, encoder_random)
 encoder_rand_perc = [round(i, 2) for i in encoder_rand_perc]
-rects1 = ax.bar(x - width/2, encoder_gen_perc, width, yerr=encoder_gen_errs, label='Compression ratio \nof generated strings')
-rects2 = ax.bar(x + width/2, encoder_rand_perc, width, yerr=encoder_rand_errs, label='Compression ratio \nof random strings')
-ax.set_ylabel('Compression ratio')
-ax.set_title('Compression ratio by length, compressed/uncompressed, custom algorithm \nseparated into collisions generated strings and random generated strings.')
+rects1 = ax.bar(x - width/2, encoder_gen_perc, width, yerr=encoder_gen_errs, label='Collision generated strings')
+rects2 = ax.bar(x + width/2, encoder_rand_perc, width, yerr=encoder_rand_errs, label='Random strings')
+ax.set_ylabel('Compression percentage')
+ax.set_title('Compression percentage by length, custom compression algorithm')
 ax.set_xlabel('String length')
 ax.set_xticks(x, labels)
 ax.set_ylim(0, 1.2)
