@@ -21,7 +21,7 @@ for i in range(20):
 plot = [[np.mean(customs[i][j]) for i in range(20)] for j in range(20)]
 errs = [[jacknife_error(customs[i][j]) for i in range(20)] for j in range(20)]
 
-fig, axes = plt.subplots(1, 2, figsize=(16, 8))
+fig, axes = plt.subplots(1, 2, figsize=(16, 6))
 
 plot0 = axes[0].contourf(plot, extent=[0, 1, 0, 1], origin='lower')
 plt.colorbar(plot0, ax=axes[0])

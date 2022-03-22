@@ -1,8 +1,7 @@
-import enum
 import matplotlib.pyplot as plt
 import numpy as np
-from compression_comparison.auxiliary import *
-from simulation import *
+from auxiliary import *
+#from simulation import *
 
 sratios = np.linspace(0.05, 0.25, 50)
 
@@ -31,10 +30,14 @@ for i in range(50):
 plotZs = [np.mean(Zs[i]) for i in range(50)]
 errs = [jacknife_error(Zs[i]) for i in range(50)]
 
-fig, ax = plt.subplots(figsize=(12, 8))
+fig, ax = plt.subplots(figsize=(12, 6))
 ax.scatter(sratios, plotZs)
 ax.errorbar(sratios, plotZs, yerr=errs, fmt='o')
-ax.set_title('Runs test Z score vs mass ratio of particle 1, \n particle 2 is 0.8, particle 3 is 1')
-ax.set_xlabel('Mass ratio')
+ax.set_title('Runs test Z score vs mass ratio $m_1/m_3$, \n $m_2/m_3$ is fixed at 0.8, particle 3 mass is 1')
+ax.set_xlabel('Mass ratio $m_1/m_3$')
 ax.set_ylabel('Z score')
 plt.savefig('Plots/2d_plots/runs_vs_massratio_1d')
+
+print(f'Minimum Z score is {min(plotZs)}')
+idx = np.argmin(plotZs)
+print(f'It occurs for mass ratio $m_1/m_3$ of {sratios[idx]}')

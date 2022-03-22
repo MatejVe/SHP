@@ -35,7 +35,7 @@ for i in range(20):
 plotZs = [[np.mean(Zs[i][j]) for i in range(20)] for j in range(20)]
 errs = [[jacknife_error(Zs[i][j]) for i in range(20)] for j in range(20)]
 
-fig, axes = plt.subplots(1, 2, figsize=(16, 8))
+fig, axes = plt.subplots(1, 2, figsize=(16, 6))
 
 plot0 = axes[0].contourf(plotZs, extent=[0, 1, 0, 1], origin='lower')
 plt.colorbar(plot0, ax=axes[0])

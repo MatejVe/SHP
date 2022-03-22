@@ -61,16 +61,21 @@ for i in range(10):
 
     axes[0].set_title('Position probability distributions')
     axes[0].set_xlim(0, 1)
+    axes[0].set_xlabel('Position (arbitrary units)')
+    axes[0].set_ylabel('Probability')
     axes[0].hist(x=positions[0], color='blue', bins=1000, histtype='step', density=True)
     axes[0].hist(x=positions[1], color='red', bins=1000, histtype='step', density=True)
     axes[0].hist(x=positions[2], color='green', bins=1000, histtype='step', density=True)
     axes[0].legend(labels=["Particle 0", "Particle 1", "Particle 2"])
 
     axes[1].set_title('Velocity probability distributions')
+    axes[1].set_xlabel('Velocity (arbitrary units)')
+    axes[1].set_ylabel('Probability')
     axes[1].hist(x=velocities[0], color='blue', bins=1000, histtype='step', density=True)
     axes[1].hist(x=velocities[1], color='red', bins=1000, histtype='step', density=True)
     axes[1].hist(x=velocities[2], color='green', bins=1000, histtype='step', density=True)
     axes[1].legend(labels=["Particle 0", "Particle 1", "Particle 2"])
 
+    plt.tight_layout()
     plt.savefig('Plots/Phase_space_distributions/3particles_distribution' + str(i))
     plt.close()

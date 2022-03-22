@@ -13,6 +13,6 @@ for i in range(nSims):
     mass = np.random.random(3)
     vels = 2*np.random.random(2) - 1
     vels = np.append(vels, (-mass[0]*vels[0] - mass[1]*vels[1])/mass[2])
-    experiment = Simulation(collisionNumber=400000, particleNumber=3, masses=mass, initVels=vels)
+    experiment = Simulation(collisionNumber=200000, particleNumber=3, masses=mass, initVels=vels)
     filename = 'Experiments/3_particles/random' + str(i)
     experiment.run(shouldLog=['time', 'positions', 'velocities'], filename=filename)
