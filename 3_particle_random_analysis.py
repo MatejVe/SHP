@@ -24,8 +24,8 @@ def convert_to_timestep(filepath):
         for j in range(3):
             newPos = (prevPoss[j] + (i+1)*ts*prevVels[j]) % 1
             newPos = newPos + D('1') if newPos < 0 else newPos
-            positions[j].append(newPos)
-            velocities[j].append(prevVels[j])
+            positions[j].append(float(newPos))
+            velocities[j].append(float(prevVels[j]))
 
     leftTime = time % ts
 
@@ -38,16 +38,16 @@ def convert_to_timestep(filepath):
         for i in range(3): # Sort the weird time step
             newPos = (poss[i] + (ts - leftTime)*vels[i]) % 1
             newPos = newPos + D('1') if newPos < 0 else newPos
-            positions[i].append(newPos)
-            velocities[i].append(vels[i])
+            positions[i].append(float(newPos))
+            velocities[i].append(float(vels[i]))
         time = time - (ts - leftTime)
 
         for i in range(int(time // ts)):
             for j in range(3):
                 newPos = (poss[j] + (i+1)*ts*vels[j] + (ts - leftTime)*vels[j]) % 1
                 newPos = newPos + D('1') if newPos < 0 else newPos
-                positions[j].append(newPos)
-                velocities[j].append(vels[j])
+                positions[j].append(float(newPos))
+                velocities[j].append(float(vels[j]))
 
         leftTime = time % ts
     f.close()
@@ -57,7 +57,7 @@ def convert_to_timestep(filepath):
 for i in range(10):
     masses, positions, velocities = convert_to_timestep('Experiments/3_particles/random' + str(i))
 
-    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(12, 8))
+    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(12, 6))
 
     axes[0].set_title('Position probability distributions')
     axes[0].set_xlim(0, 1)
