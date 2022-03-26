@@ -67,7 +67,7 @@ for length in lengths:
     encoder_random.append(encoder_row)
     entropy_random.append(entropy_row)
 
-fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+fig, axes = plt.subplots(2, 2, figsize=(16, 10))
 labels = [str(length) for length in lengths]
 x = np.arange(len(labels))
 width = 0.35

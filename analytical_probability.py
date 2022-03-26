@@ -27,7 +27,7 @@ for m1 in masses1:
     probs.append(row)
 
 fig, axes = plt.subplots(1, 1, figsize=(9, 6))
-plot = axes.contourf(probs, extent=[0,1,0,1], origin='lower')
+plot = axes.contourf(probs, extent=[0,1,0,1], origin='lower', cmap='magma')
 plt.colorbar(plot, ax=axes)
 axes.set_title('Analytical probability of special collision')
 axes.set_xlabel('$m_1/m_3$ ratio')

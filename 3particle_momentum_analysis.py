@@ -22,7 +22,7 @@ for i in range(10):
 
     f.close()
 
-    fig, ax = plt.subplots(1, 1, figsize=(16, 8))
+    fig, ax = plt.subplots(1, 1, figsize=(12, 6))
     ax.set_title('Momentum and probability distributions overlayed together')
     ax.hist(x=momenta[0], color='blue', bins=500, histtype='step', weights=times, density=True)
     ax.hist(x=momenta[1], color='red', bins=500, histtype='step', weights=times, density=True)
