@@ -7,8 +7,8 @@ masses2 = np.linspace(0, 1, 1000)
 def probability(m1, m2, m3):
     a = m1/m3
     b = m2/m3
-    numerator = a*(b+1)*(4*b+a+a*b)
-    denominator = (a*b+2*a+b**2+b)**2 + a*(3*a+4*b+4*b**2+4*a*b)
+    numerator = a*b*((b+1)**2+a*b+a)
+    denominator = (b+1)*((a*b+2*a+b**2+b)**2+a*(3*a+4*b+4*b**2+4*a*b))
     const = 1/2 * np.sqrt(numerator/denominator)
     if m1 > m2:
         return 1/4 - 1/(2*np.pi) * np.arcsin(1-2*const)
