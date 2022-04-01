@@ -10,7 +10,7 @@ import numpy as np
 nSims = 10
 
 for i in range(nSims):
-    mass = np.random.random(3)
+    mass = [0.097, 0.87, 1]
     vels = 2*np.random.random(2) - 1
     vels = np.append(vels, (-mass[0]*vels[0] - mass[1]*vels[1])/mass[2])
     experiment = Simulation(collisionNumber=500000, particleNumber=3, masses=mass, initVels=vels)

@@ -3,8 +3,7 @@ import matplotlib.pyplot as plt
 import sys
 import zlib
 from auxiliary import *
-
-# I chose to do experiments with 10 different sizes, arranged in 100000*(i+1) and within each size 20 experiments
+plt.rcParams['font.size'] = '20'
 
 sizes = np.logspace(2, 7, 6)
 nSims = 40
@@ -70,11 +69,11 @@ width= 0.35
 rects1 = ax.bar(x - width/2, perc_gen_means, width, yerr=perc_gen_stds, label='Compression ratio \nof generated strings')
 rects2 = ax.bar(x + width/2, perc_rand_means, width, yerr=perc_rand_stds, label='Compression ratio \nof random strings')
 
-ax.set_ylabel('Compression ratio')
-ax.set_title('Compression ratio by length, uncompressed/compressed, zlib \nseparated into collisions generated strings and random generated strings.')
+ax.set_ylabel('Compression percentage')
+ax.set_title('Compression percentage, zlib compression algorithm')
 ax.set_xlabel('String length')
 ax.set_xticks(x, labels)
-ax.set_ylim(0, 1.2)
+ax.set_ylim(0, 0.8)
 ax.legend()
 
 ax.bar_label(rects1, padding=3)

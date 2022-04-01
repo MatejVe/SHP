@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 #from simulation import *
 from auxiliary import *
+plt.rcParams['font.size'] = '20'
 
 ratios13 = np.linspace(0.01, 1, 20)
 ratios23 = np.linspace(0.01, 1, 20)
