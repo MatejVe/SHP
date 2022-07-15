@@ -32,7 +32,7 @@ class Particle:
 
 
 # Auxiliary functions used in the code
-def ring_distance(particle1, particle2):  
+def ring_distance(particle1, particle2):
     # Assume that the particle1 is the first one to the left of the particle2
     pos1, vel1 = particle1.position, particle1.velocity
     pos2, vel2 = particle2.position, particle2.velocity

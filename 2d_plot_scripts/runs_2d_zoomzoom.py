@@ -6,7 +6,7 @@ from simulation import *
 ratios13 = np.linspace(0.08, 0.12, 40)
 ratios23 = np.linspace(0.8, 0.9, 40)
 
-#for i, ratio13 in enumerate(ratios13):
+# for i, ratio13 in enumerate(ratios13):
 #    for j, ratio23 in enumerate(ratios23):
 #        masses = np.array([ratio13, ratio23, 1])
 #        for k in range(10):
@@ -23,7 +23,14 @@ for i in range(40):
     for j in range(40):
         column = []
         for k in range(10):
-            string = convert_to_string('Experiments/runs_2d_zoomzoom/index' + str(i) + '_' + str(j) + '_' + str(k))
+            string = convert_to_string(
+                "Experiments/runs_2d_zoomzoom/index"
+                + str(i)
+                + "_"
+                + str(j)
+                + "_"
+                + str(k)
+            )
             result = runsTest(string)
             if result is not None:
                 column.append(abs(result))
@@ -32,11 +39,11 @@ for i in range(40):
 plotZs = [[np.mean(Zs[i][j]) for i in range(40)] for j in range(40)]
 
 fig, axes = plt.subplots(1, 1, figsize=(9, 6))
-plot = axes.contourf(plotZs, extent=[0.08, 0.12, 0.8, 0.9], origin='lower')
+plot = axes.contourf(plotZs, extent=[0.08, 0.12, 0.8, 0.9], origin="lower")
 plt.colorbar(plot, ax=axes)
-axes.set_title('Runs test Z score in a zoomed-in area')
-axes.set_xlabel('$m_1/m_3$ ratio')
-axes.set_ylabel('$m_2/m_3$ ratio')
+axes.set_title("Runs test Z score in a zoomed-in area")
+axes.set_xlabel("$m_1/m_3$ ratio")
+axes.set_ylabel("$m_2/m_3$ ratio")
 plt.tight_layout()
-plt.savefig('Plots/2d_plots/runs_2d_zoomzoom')
+plt.savefig("Plots/2d_plots/runs_2d_zoomzoom")
 plt.close()
