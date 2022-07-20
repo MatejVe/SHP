@@ -1,5 +1,7 @@
+from matplotlib.pyplot import table
 import numpy as np
 from decimal import Decimal
+import sqlite3
 
 
 # Let's start with defining the classes that will be used in the simulation
@@ -168,6 +170,7 @@ class Sistem:
         ]
         self.positions = [particle.position for particle in self.particles]
         self.velocities = [particle.velocity for particle in self.particles]
+        self.momenta = [particle.velocity * particle.mass for particle in self.particles]
         self.indexes = [particle.index for particle in self.particles]
         self.momentum = sum(
             [particle.mass * particle.velocity for particle in self.particles]
@@ -259,6 +262,7 @@ class Sistem:
         # Update the positions and velocities in the sistem class for purposes of logging them later
         self.positions = [particle.position for particle in self.particles]
         self.velocities = [particle.velocity for particle in self.particles]
+        self.momenta = [particle.velocity * particle.mass for particle in self.particles]
 
         # Find the time the particles will stay in this state and the next two colliding particles
         time, colParIndex = self.find_next_event_s()
@@ -294,7 +298,7 @@ class Simulation:
             initVelocities=initVels,
         )
 
-    def run(self, shouldPrint=None, shouldLog=None, filename=None):
+    def run(self, shouldPrint=None, shouldLog=None, tableName=None):
         """
         This function collides the particles preset amount of times.
 
@@ -308,20 +312,60 @@ class Simulation:
             filename (string, optional): Path and the filename of where you want the shouldLog data saved. If using shouldLog
                                         argument please provide the path as well.
         """
-        if filename is not None:
-            f = open(filename, "w")
+        if tableName is not None:
+            # Extract how many collumns we will need
+            fieldsNum = 0
+            names = []
+            for attribute in shouldLog:
+                if hasattr(self.sistem, attribute):
+                    firstValue = getattr(self.sistem, attribute)
+                    if isinstance(firstValue, list) or isinstance(firstValue, tuple):
+                        fieldsNum += len(firstValue)
+                        names += [attribute + str(i) for i in range(len(firstValue))]
+                    else:
+                        fieldsNum += 1
+                        names += [shouldLog]
+            columnNamesString = ','.join(['{}']*fieldsNum).format(*names)
+            
+            # connect to the database
+            conn = sqlite3.connect('Experiments.db')
+            c = conn.cursor()
+            
+            # get the count of tables with the name
+            # TODO: supposedly this is insecure and shouldn't use %s to insert the name
+            # but rather (?) and then supply the name as a tuple as a second argument
+            # I can't make it to work though
+            c.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='%s' ''' %tableName)
 
-            # Write down number of particles and their masses
-            massStr = " ".join(str(mass) for mass in self.sistem.masses)
+            # if the count is 1, then table exists
+            if c.fetchone()[0]==1:
+                # delete the table
+                c.execute("DROP TABLE %s" %tableName)
+            # Create a new table with all the data that is to be saved
+            c.execute("CREATE TABLE {} ".format(tableName)+'('+columnNamesString+')')
 
-            f.write(
-                f"Number of particles is: {self.sistem.particleNum} | Masses: {massStr} \n"
-            )
-
-            attributeStr = "|".join(attribute for attribute in shouldLog)
-            f.write(attributeStr + "\n")
 
         for _ in range(self.collisionNumber):
+            if tableName is not None:
+                QUESTIONMARKS = ','.join(['?']*fieldsNum)
+                dataRow = []
+
+                for attribute in shouldLog:
+                    if hasattr(self.sistem, attribute):
+                        values = getattr(self.sistem, attribute)
+                        if isinstance(values, list):
+                            if isinstance(values[0], tuple):
+                                dataRow += [str(value) for value in values]
+                            else: # isinstance(values[0], Decimal)
+                                dataRow += [float(value) for value in values]
+                        elif isinstance(values, tuple):
+                            dataRow.append(str(values))
+                        elif isinstance(values, str):
+                            dataRow.append(values)
+                        else:
+                            raise Exception('Unsupported data type')
+                c.execute('INSERT INTO {} VALUES ({})'.format(tableName, QUESTIONMARKS), tuple(dataRow))
+                conn.commit()
 
             if shouldPrint is not None:
                 for (
@@ -350,24 +394,10 @@ class Simulation:
             if shouldPrint is not None:
                 print("")
 
-            if filename is not None:
-                for attribute in shouldLog:
-                    if hasattr(self.sistem, attribute):
-                        values = getattr(self.sistem, attribute)
-                        if isinstance(values, list):
-                            if isinstance(values[0], tuple):
-                                for value in values:
-                                    f.write(" ".join(str(item) for item in value))
-                            else:
-                                f.write(" ".join(str(value) for value in values) + "|")
-                        else:
-                            f.write(str(getattr(self.sistem, attribute)) + "|")
-                f.write("\n")
-
             self.sistem.update_particles(self.sistem.time, self.sistem.collideIndices)
 
-        if filename is not None:
-            f.close()
+        if tableName is not None:
+            conn.close()
 
 
 if __name__ == "__main__":
@@ -377,6 +407,6 @@ if __name__ == "__main__":
     # Experiment1 = Simulation(collisionNumber=20, particleNumber=3, masses=[1, 1, 1], initPoss=[0.2, 0.5, 0.8], initVels=[1, 0, -1])
     # Experiment1 = Simulation(collisionNumber=10, particleNumber=4, masses=[1, 1, 1, 1], initPoss=[0.1, 0.4, 0.6, 0.9], initVels=[1, -1, 1, -1])
     Experiment1 = Simulation(collisionNumber=10, particleNumber=3)
-    Experiment1.run(shouldPrint=["positions", "velocities", "collideIndices"])
+    Experiment1.run(shouldPrint=["positions", "velocities", "collideIndices"], shouldLog=["positions", "velocities", "collideIndices"], tableName='test')
     time2 = time.time()
     print(f"Elapsed time: {time2 - time1}s")
