@@ -8,8 +8,8 @@ from auxiliary import *
 
 encoder = RunLengthEncoder()
 
-sizes = np.logspace(2, 7, 6)
-nSims = 40
+sizes = np.logspace(2, 6, 5)
+nSims = 10
 
 generated_sizes = []
 zlib_generated = []
@@ -26,7 +26,7 @@ for i in range(len(sizes)):
 
     for j in range(nSims):
         string = convert_to_string(
-            "Experiments/3particlestrings/size" + str(int(sizes[i])) + "_" + str(j)
+            "particlescollide3_size{}_num{}".format(str(int(sizes[i])), str(j))
         )
         gen_row.append(sys.getsizeof(string.encode()))
         zlib_row.append(sys.getsizeof(zlib.compress(string.encode())))

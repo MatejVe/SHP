@@ -5,8 +5,8 @@ from auxiliary import *
 
 encoder = RunLengthEncoder()
 
-sizes = np.logspace(2, 7, 6)
-nSims = 40
+sizes = np.logspace(2, 5, 4)
+nSims = 10
 
 generated_sizes = []
 compressed_generated = []
@@ -15,7 +15,7 @@ for i in range(len(sizes)):
     comp_gen_sized = []
     for j in range(nSims):
         string = convert_to_string(
-            "Experiments/3particlestrings/size" + str(int(sizes[i])) + "_" + str(j)
+            "particlescollide3_size{}_num{}".format(str(int(sizes[i])), str(j))
         )
         size = len(string)
         comp_size = len(encoder.encode_b(string))

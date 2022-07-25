@@ -1,8 +1,9 @@
 from matplotlib.pyplot import table
 import numpy as np
-from decimal import Decimal
+from decimal import *
 import sqlite3
 
+getcontext().prec = 10
 
 # Let's start with defining the classes that will be used in the simulation
 # Base particle class
@@ -170,7 +171,9 @@ class Sistem:
         ]
         self.positions = [particle.position for particle in self.particles]
         self.velocities = [particle.velocity for particle in self.particles]
-        self.momenta = [particle.velocity * particle.mass for particle in self.particles]
+        self.momenta = [
+            particle.velocity * particle.mass for particle in self.particles
+        ]
         self.indexes = [particle.index for particle in self.particles]
         self.momentum = sum(
             [particle.mass * particle.velocity for particle in self.particles]
@@ -262,7 +265,9 @@ class Sistem:
         # Update the positions and velocities in the sistem class for purposes of logging them later
         self.positions = [particle.position for particle in self.particles]
         self.velocities = [particle.velocity for particle in self.particles]
-        self.momenta = [particle.velocity * particle.mass for particle in self.particles]
+        self.momenta = [
+            particle.velocity * particle.mass for particle in self.particles
+        ]
 
         # Find the time the particles will stay in this state and the next two colliding particles
         time, colParIndex = self.find_next_event_s()
@@ -325,29 +330,28 @@ class Simulation:
                     else:
                         fieldsNum += 1
                         names += [shouldLog]
-            columnNamesString = ','.join(['{}']*fieldsNum).format(*names)
-            
+            columnNamesString = ",".join(["{}"] * fieldsNum).format(*names)
+
             # connect to the database
-            conn = sqlite3.connect('Experiments.db')
+            conn = sqlite3.connect("Experiments.db")
             c = conn.cursor()
-            
+
             # get the count of tables with the name
-            # TODO: supposedly this is insecure and shouldn't use %s to insert the name
-            # but rather (?) and then supply the name as a tuple as a second argument
-            # I can't make it to work though
-            c.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='%s' ''' %tableName)
+            c.execute(
+                """ SELECT count(name) FROM sqlite_master WHERE type='table' AND name='%s' """
+                % tableName
+            )
 
             # if the count is 1, then table exists
-            if c.fetchone()[0]==1:
+            if c.fetchone()[0] == 1:
                 # delete the table
-                c.execute("DROP TABLE %s" %tableName)
+                c.execute("DROP TABLE %s" % tableName)
             # Create a new table with all the data that is to be saved
-            c.execute("CREATE TABLE {} ".format(tableName)+'('+columnNamesString+')')
-
+            c.execute("CREATE TABLE '{}' ({})".format(tableName, columnNamesString))
 
         for _ in range(self.collisionNumber):
             if tableName is not None:
-                QUESTIONMARKS = ','.join(['?']*fieldsNum)
+                QUESTIONMARKS = ",".join(["?"] * fieldsNum)
                 dataRow = []
 
                 for attribute in shouldLog:
@@ -356,15 +360,18 @@ class Simulation:
                         if isinstance(values, list):
                             if isinstance(values[0], tuple):
                                 dataRow += [str(value) for value in values]
-                            else: # isinstance(values[0], Decimal)
+                            else:  # isinstance(values[0], Decimal)
                                 dataRow += [float(value) for value in values]
                         elif isinstance(values, tuple):
                             dataRow.append(str(values))
                         elif isinstance(values, str):
                             dataRow.append(values)
                         else:
-                            raise Exception('Unsupported data type')
-                c.execute('INSERT INTO {} VALUES ({})'.format(tableName, QUESTIONMARKS), tuple(dataRow))
+                            raise Exception("Unsupported data type")
+                c.execute(
+                    "INSERT INTO {} VALUES ({})".format(tableName, QUESTIONMARKS),
+                    tuple(dataRow),
+                )
                 conn.commit()
 
             if shouldPrint is not None:
@@ -407,6 +414,10 @@ if __name__ == "__main__":
     # Experiment1 = Simulation(collisionNumber=20, particleNumber=3, masses=[1, 1, 1], initPoss=[0.2, 0.5, 0.8], initVels=[1, 0, -1])
     # Experiment1 = Simulation(collisionNumber=10, particleNumber=4, masses=[1, 1, 1, 1], initPoss=[0.1, 0.4, 0.6, 0.9], initVels=[1, -1, 1, -1])
     Experiment1 = Simulation(collisionNumber=10, particleNumber=3)
-    Experiment1.run(shouldPrint=["positions", "velocities", "collideIndices"], shouldLog=["positions", "velocities", "collideIndices"], tableName='test')
+    Experiment1.run(
+        shouldPrint=["positions", "velocities", "collideIndices"],
+        shouldLog=["positions", "velocities", "collideIndices"],
+        tableName="test",
+    )
     time2 = time.time()
     print(f"Elapsed time: {time2 - time1}s")

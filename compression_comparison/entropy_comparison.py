@@ -3,18 +3,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 from auxiliary import *
 
-sizes = np.logspace(2, 7, 6)
-nSims = 40
+sizes = np.logspace(2, 5, 4)
+nSims = 10
 
 generated_strings = []
 for i in range(len(sizes)):
     group = []
     for j in range(nSims):
-        group.append(
-            convert_to_string(
-                "Experiments/3particlestrings/size" + str(int(sizes[i])) + "_" + str(j)
-            )
+        string = convert_to_string(
+            "particlescollide3_size{}_num{}".format(str(int(sizes[i])), str(j))
         )
+        group.append(string)
     generated_strings.append(group)
 
 lengths = [len(group[0]) for group in generated_strings]

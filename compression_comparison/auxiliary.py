@@ -1,18 +1,16 @@
-from decimal import DivisionByZero
 import numpy as np
 import math
+import sqlite3
 
 
-def convert_to_string(filepath):
-    """Only use on files that strictly contain collide indices."""
-    f = open(filepath)
+def convert_to_string(tableName):
+    """Only use on tables that strictly contain collide indices."""
     collisions = []
+    con = sqlite3.connect("Experiments.db")
+    cur = con.cursor()
 
-    f.readline()
-    f.readline()
-
-    for line in f.readlines():
-        left, right = line.strip().split(" ")
+    for line in cur.execute("SELECT * FROM {}".format(tableName)):
+        left, right = line[0][1:-1].split(", ")
         left = int(left) + 3 if int(left) < 0 else int(left)
         right = int(right) + 3 if int(right) < 0 else int(right)
         collisions.append((left, right))
