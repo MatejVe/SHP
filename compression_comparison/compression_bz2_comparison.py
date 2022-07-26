@@ -16,8 +16,9 @@ for i in range(len(sizes)):
         string = convert_to_string(
             "particlescollide3_size{}_num{}".format(str(int(sizes[i])), str(j))
         )
-        size = sys.getsizeof(string.encode())
-        comp_size = sys.getsizeof(bz2.compress(string.encode()))
+        bites = convert_to_bytes_object(string)
+        size = sys.getsizeof(bites)
+        comp_size = sys.getsizeof(bz2.compress(bites))
 
         gen_sized.append(size)
         comp_gen_sized.append(comp_size)
@@ -33,10 +34,10 @@ for length in lengths:
     rand_sized = []
     comp_rand_sized = []
     for j in range(nSims):
-        random = np.random.randint(0, 2, size=length)
-        random = "".join([str(r) for r in random])
-        size = sys.getsizeof(random.encode())
-        comp_size = sys.getsizeof(bz2.compress(random.encode()))
+        randomString = "".join([str(r) for r in np.random.randint(0, 2, size=length)])
+        bites = convert_to_bytes_object(randomString)
+        size = sys.getsizeof(bites)
+        comp_size = sys.getsizeof(bz2.compress(bites))
 
         rand_sized.append(size)
         comp_rand_sized.append(comp_size)
@@ -93,7 +94,7 @@ ax.set_title(
 )
 ax.set_xlabel("String length")
 ax.set_xticks(x, labels)
-ax.set_ylim(0, 1.2)
+# ax.set_ylim(0, 1.5)
 ax.legend()
 
 ax.bar_label(rects1, padding=3)

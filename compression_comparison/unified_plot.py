@@ -8,7 +8,7 @@ from auxiliary import *
 
 encoder = RunLengthEncoder()
 
-sizes = np.logspace(2, 6, 5)
+sizes = np.logspace(2, 5, 4)
 nSims = 10
 
 generated_sizes = []
@@ -28,9 +28,10 @@ for i in range(len(sizes)):
         string = convert_to_string(
             "particlescollide3_size{}_num{}".format(str(int(sizes[i])), str(j))
         )
-        gen_row.append(sys.getsizeof(string.encode()))
-        zlib_row.append(sys.getsizeof(zlib.compress(string.encode())))
-        bz2_row.append(sys.getsizeof(bz2.compress(string.encode())))
+        bites = convert_to_bytes_object(string)
+        gen_row.append(sys.getsizeof(bites))
+        zlib_row.append(sys.getsizeof(zlib.compress(bites)))
+        bz2_row.append(sys.getsizeof(bz2.compress(bites)))
         encoder_row.append(len(encoder.encode_b(string)))
         entropy_row.append(entropy2(string, base=2))
 
@@ -55,13 +56,13 @@ for length in lengths:
     encoder_row = []
     entropy_row = []
     for j in range(nSims):
-        random = np.random.randint(0, 2, size=length)
-        string = "".join([str(r) for r in random])
-        rand_row.append(sys.getsizeof(string.encode()))
-        zlib_row.append(sys.getsizeof(zlib.compress(string.encode())))
-        bz2_row.append(sys.getsizeof(bz2.compress(string.encode())))
-        encoder_row.append(len(encoder.encode_b(string)))
-        entropy_row.append(entropy2(string, base=2))
+        randomString = "".join([str(r) for r in np.random.randint(0, 2, size=length)])
+        bites = convert_to_bytes_object(randomString)
+        rand_row.append(sys.getsizeof(bites))
+        zlib_row.append(sys.getsizeof(zlib.compress(bites)))
+        bz2_row.append(sys.getsizeof(bz2.compress(bites)))
+        encoder_row.append(len(encoder.encode_b(randomString)))
+        entropy_row.append(entropy2(randomString, base=2))
 
     rand_sizes.append(rand_row)
     zlib_random.append(zlib_row)
@@ -118,7 +119,7 @@ ax.set_ylabel("Compression percentage")
 ax.set_title("Compression percentage by length, \n zlib compression algorithm")
 ax.set_xlabel("String length")
 ax.set_xticks(x, labels)
-ax.set_ylim(0, 0.7)
+ax.set_ylim(0, 1.4)
 ax.legend()
 ax.bar_label(rects1, padding=3)
 ax.bar_label(rects2, padding=3)
@@ -142,7 +143,7 @@ ax.set_ylabel("Compression percentage")
 ax.set_title("Compression percentage by length, \n bz2 compression algorithm")
 ax.set_xlabel("String length")
 ax.set_xticks(x, labels)
-ax.set_ylim(0, 0.9)
+ax.set_ylim(0, 2.2)
 ax.legend()
 ax.bar_label(rects1, padding=3)
 ax.bar_label(rects2, padding=3)
@@ -172,7 +173,7 @@ ax.set_ylabel("Compression percentage")
 ax.set_title("Compression percentage by length, custom compression algorithm")
 ax.set_xlabel("String length")
 ax.set_xticks(x, labels)
-ax.set_ylim(0, 1.4)
+# ax.set_ylim(0, 1.4)
 ax.legend()
 ax.bar_label(rects1, padding=3)
 ax.bar_label(rects2, padding=3)
