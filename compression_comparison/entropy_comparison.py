@@ -46,40 +46,15 @@ rand_errs = [
     for group in random_strings
 ]
 
-fig, ax = plt.subplots(figsize=(12, 8))
 labels = [str(length) for length in lengths]
 
-x = np.arange(len(labels))
-width = 0.35
-
-rects1 = ax.bar(
-    x - width / 2,
-    generated_entropies,
-    width,
-    yerr=gen_errs,
-    label="Entropy of collision generated strings",
+comparative_barplot(
+    datas=[generated_entropies, random_entropies],
+    yerrs=[gen_errs, rand_errs],
+    labels=["Entropy of collision generated strings", "Entropy of random generated strings"],
+    xticks=labels,
+    ylabel="Entropy [bits]",
+    xlabel="Number of bits in the string",
+    title="Entropy by number of bits",
+    filepath="Plots/comparison_graphs/entropy_comparison"
 )
-rects2 = ax.bar(
-    x + width / 2,
-    random_entropies,
-    width,
-    yerr=rand_errs,
-    label="Entropy of random generated strings",
-)
-
-ax.set_ylabel("Entropy [bits]")
-ax.set_title(
-    "Entropy by string length, separated into collisions generated and random generated strings."
-)
-ax.set_xlabel("String length")
-ax.set_xticks(x, labels)
-ax.set_ylim(0, 1.2)
-ax.legend()
-
-ax.bar_label(rects1, padding=3)
-ax.bar_label(rects2, padding=3)
-
-fig.tight_layout()
-
-plt.savefig("Plots/comparison_graphs/entropy_comparison")
-plt.close()

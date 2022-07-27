@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import sys
 from auxiliary import *
 
 encoder = RunLengthEncoder()
@@ -61,47 +60,21 @@ percentage_random = [
     for rand, sized in zip(rand_size_means, compressed_random)
 ]
 
-perc_gen_means = [round(np.mean(size), 2) for size in percentage_generated]
-perc_gen_stds = [jacknife_error(size) for size in percentage_generated]
+perc_gen_means = [100*round(np.mean(size), 3) for size in percentage_generated]
+perc_gen_stds = [100*jacknife_error(size) for size in percentage_generated]
 
-perc_rand_means = [round(np.mean(size), 2) for size in percentage_random]
-perc_rand_stds = [jacknife_error(size) for size in percentage_random]
+perc_rand_means = [100*round(np.mean(size), 3) for size in percentage_random]
+perc_rand_stds = [100*jacknife_error(size) for size in percentage_random]
 
-
-fig, ax = plt.subplots(figsize=(12, 8))
 labels = [str(length) for length in lengths]
 
-x = np.arange(len(labels))
-width = 0.35
-
-rects1 = ax.bar(
-    x - width / 2,
-    perc_gen_means,
-    width,
-    yerr=perc_gen_stds,
-    label="Compression ratio \nof generated strings",
+comparative_barplot(
+    datas=[perc_gen_means, perc_rand_means],
+    yerrs=[perc_gen_stds, perc_rand_stds],
+    labels=["Compression percentage \nof generated strings", "Compression percentage \nof random strings"],
+    xticks=labels,
+    ylabel="Compression percentage",
+    xlabel="Number of bits in the string",
+    title="Compression percentage, custom compression algorithm",
+    filepath="Plots/comparison_graphs/compression_customb_comparison"
 )
-rects2 = ax.bar(
-    x + width / 2,
-    perc_rand_means,
-    width,
-    yerr=perc_rand_stds,
-    label="Compression ratio \nof random strings",
-)
-
-ax.set_ylabel("Compression ratio")
-ax.set_title(
-    "Compression ratio by length, compressed/uncompressed, custom algorithm \nseparated into collisions generated strings and random generated strings."
-)
-ax.set_xlabel("String length")
-ax.set_xticks(x, labels)
-ax.set_ylim(0, 1.2)
-ax.legend()
-
-ax.bar_label(rects1, padding=3)
-ax.bar_label(rects2, padding=3)
-
-fig.tight_layout()
-
-plt.savefig("Plots/comparison_graphs/compression_customb_comparison")
-plt.close()

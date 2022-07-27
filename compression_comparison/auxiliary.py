@@ -1,6 +1,7 @@
 import numpy as np
 import math
 import sqlite3
+import matplotlib.pyplot as plt
 
 
 def convert_to_string(tableName):
@@ -271,3 +272,46 @@ def percentage_and_error(strings, compressed):
     perc_means = [np.mean(group) for group in percentage]
     perc_errs = [jacknife_error(group) for group in percentage]
     return perc_means, perc_errs
+
+
+def comparative_barplot(
+    datas: list,
+    yerrs: list,
+    labels: list,
+    xticks: list,
+    ylabel: str,
+    xlabel: str,
+    title: str,
+    filepath: str,
+):
+    """_summary_
+
+    Args:
+        datas (list): _description_
+        yerrs (list): _description_
+        labels (list): _description_
+        xticks (list): _description_
+        ylabel (str): _description_
+        xlabel (str): _description_
+        title (str): _description_
+        filepath (str): _description_
+    """
+    fig, ax = plt.subplots(figsize=(12, 8))
+    x = np.arange(len(xticks))
+    width = 0.35
+    nbars = len(datas)
+
+
+    for i in range(2):
+        rects = ax.bar(x - width / 2 + 2*i/nbars*width, datas[i], width, yerr=yerrs[i], label=labels[i])
+        ax.bar_label(rects, padding=3)
+
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
+    ax.set_xlabel(xlabel)
+    ax.set_xticks(x, xticks)
+    ax.legend()
+
+    fig.tight_layout()
+    plt.savefig(filepath)
+    plt.close()
