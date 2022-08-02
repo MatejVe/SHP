@@ -2,15 +2,12 @@ from simulation import *
 import numpy as np
 import time
 
-# print(os.getcwd())
-
 # Let's conduct a bunch of colliding experiments, with randomized positions and velocitites
 # Velocities are such that the total momentum ends up being zero
 
 # mass = np.random.random(3) # tried with same mass, maybe changing it will change the results
 
 sizes = np.logspace(2, 5, 4)
-
 nSims = 10
 
 time1 = time.time()
@@ -25,6 +22,7 @@ for i in range(len(sizes)):
         poss = np.random.random(3)
 
         # Save the collision indices
+        tableName = "particlescollide3_size{}_num{}".format(str(int(sizes[i])), str(j))
         experiment = Simulation(
             collisionNumber=int(sizes[i] + 1),
             particleNumber=3,
@@ -32,8 +30,7 @@ for i in range(len(sizes)):
             initVels=vels,
             initPoss=poss,
         )
-        tableName = "particlescollide3_size{}_num{}".format(str(int(sizes[i])), str(j))
-        experiment.run(shouldLog=["collideIndices"], tableName=tableName)
+        experiment.run(shouldLog=["collideIndices"], storageType='table', storageName=tableName)
         time22 = time.time()
         print(f"It took me {time22-time11:.2f}s to simulate size {sizes[i]}.")
         # Save the first few position and velocity data so we can see what is going on

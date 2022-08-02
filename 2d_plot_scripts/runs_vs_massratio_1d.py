@@ -1,23 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from auxiliary import *
-from simulation import *
 
 sratios = np.linspace(0.08, 0.12, 50)
 
 Zs = []
-
-for i, ratio13 in enumerate(sratios):
-    masses = np.array([ratio13, 0.87, 1])
-    for k in range(40):
-        vels = 2 * np.random.random(2) - 1
-        vels = np.append(vels, (-masses[0] * vels[0] - masses[1] * vels[1]) / masses[2])
-        experiment = Simulation(
-            collisionNumber=100000, particleNumber=3, masses=masses, initVels=vels
-        )
-        filename = "Experiments/runs_mass_tests1d/index" + str(i) + "_" + str(k)
-        experiment.run(shouldLog=["collideIndices"], filename=filename)
-
 
 for i in range(50):
     Zratio = []
