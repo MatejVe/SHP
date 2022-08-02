@@ -303,7 +303,7 @@ class Simulation:
             initVelocities=initVels,
         )
 
-    def run(self, shouldPrint=None, shouldLog=None, tableName=None):
+    def run(self, shouldPrint=None, shouldLog=None, storageType='table', storageName=None):
         """
         This function collides the particles preset amount of times.
 
@@ -314,10 +314,14 @@ class Simulation:
             shouldLog (list, optional): List of sistem object attributes you would like to have saved.
                                         Options are: 'positions', 'velocities', 'time', 'energy', 'momentum', 'indexes', 'collideIndices'.
                                         Defaults to None.
+            type (string, optional): indicates what type of storage is used. Can be pure file writing, database use,
+                                        or just passing the data back in the code.
+                                        Options are: 'table', 'file', 'returnData'
+                                        Defaults to 'table'
             filename (string, optional): Path and the filename of where you want the shouldLog data saved. If using shouldLog
                                         argument please provide the path as well.
         """
-        if tableName is not None:
+        if storageName is not None and storageType=='table':
             # Extract how many collumns we will need
             fieldsNum = 0
             names = []
@@ -339,18 +343,39 @@ class Simulation:
             # get the count of tables with the name
             c.execute(
                 """ SELECT count(name) FROM sqlite_master WHERE type='table' AND name='%s' """
-                % tableName
+                % storageName
             )
 
             # if the count is 1, then table exists
             if c.fetchone()[0] == 1:
                 # delete the table
-                c.execute("DROP TABLE %s" % tableName)
+                c.execute("DROP TABLE %s" % storageName)
             # Create a new table with all the data that is to be saved
-            c.execute("CREATE TABLE '{}' ({})".format(tableName, columnNamesString))
+            c.execute("CREATE TABLE '{}' ({})".format(storageName, columnNamesString))
+        elif storageType=='file' and storageName is not None:
+            f = open(storageName, "w")
+            # write down the number of particles and their masses
+            massStr = " ".join(str(mass) for mass in self.sistem.masses)
+
+            f.write(
+                f"Number of particles is: {self.sistem.particleNum} | Masses: {massStr} \n"
+            )
+
+            attributeStr = "|".join(attribute for attribute in shouldLog)
+            f.write(attributeStr + "\n")
+        elif storageType=='returnData':
+            # we will store everything in a dictionary that will be returned
+            dataDict = {}
+            # store masses
+            dataDict['masses'] = [mass for mass in self.sistem.masses]
+            dataDict['particle number'] = self.sistem.particleNum
+            for attribute in shouldLog:
+                dataDict[attribute] = []
+        else:
+            raise Exception("Invalid input combination of 'storageType' and/or 'storageName'.")
 
         for _ in range(self.collisionNumber):
-            if tableName is not None:
+            if storageName is not None and storageType=='table':
                 QUESTIONMARKS = ",".join(["?"] * fieldsNum)
                 dataRow = []
 
@@ -369,10 +394,27 @@ class Simulation:
                         else:
                             raise Exception("Unsupported data type")
                 c.execute(
-                    "INSERT INTO {} VALUES ({})".format(tableName, QUESTIONMARKS),
+                    "INSERT INTO {} VALUES ({})".format(storageName, QUESTIONMARKS),
                     tuple(dataRow),
                 )
                 conn.commit()
+            elif storageType=='file' and storageName is not None:
+                for attribute in shouldLog:
+                    if hasattr(self.sistem, attribute):
+                        values = getattr(self.sistem, attribute)
+                        if isinstance(values, list):
+                            if isinstance(values[0], tuple):
+                                for value in values:
+                                    f.write(" ".join(str(item) for item in value))
+                            else:
+                                f.write(" ".join(str(value) for value in values) + "|")
+                        else:
+                            f.write(str(getattr(self.sistem, attribute)) + "|")
+                f.write("\n")
+            elif storageType=='returnData':
+                for attribute in shouldLog:
+                    if hasattr(self.sistem, attribute):
+                        dataDict[attribute].append(tuple(getattr(self.sistem, attribute)))
 
             if shouldPrint is not None:
                 for (
@@ -403,8 +445,12 @@ class Simulation:
 
             self.sistem.update_particles(self.sistem.time, self.sistem.collideIndices)
 
-        if tableName is not None:
+        if storageName is not None and storageType=='table':
             conn.close()
+        elif storageType=='file' and storageName is not None:
+            f.close()
+        elif storageType=='returnData':
+            return dataDict
 
 
 if __name__ == "__main__":
