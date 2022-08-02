@@ -1,18 +1,17 @@
-from decimal import DivisionByZero
 import numpy as np
 import math
+import sqlite3
+import matplotlib.pyplot as plt
 
 
-def convert_to_string(filepath):
-    """Only use on files that strictly contain collide indices."""
-    f = open(filepath)
+def convert_to_string(tableName):
+    """Only use on tables that strictly contain collide indices."""
     collisions = []
+    con = sqlite3.connect("Experiments.db")
+    cur = con.cursor()
 
-    f.readline()
-    f.readline()
-
-    for line in f.readlines():
-        left, right = line.strip().split(" ")
+    for line in cur.execute("SELECT * FROM {}".format(tableName)):
+        left, right = line[0][1:-1].split(", ")
         left = int(left) + 3 if int(left) < 0 else int(left)
         right = int(right) + 3 if int(right) < 0 else int(right)
         collisions.append((left, right))
@@ -31,6 +30,41 @@ def convert_to_string(filepath):
 
         crnt = next
     return string
+
+
+def convert_to_bytes_object(string, bitsToBytes=8):
+    """Only use on binary strings"""
+    bites = b""
+    i = 0
+    while i < len(string) - bitsToBytes:
+        bits = int_to_bytes(int(string[i : i + bitsToBytes], 2))
+        i += bitsToBytes
+        bites += bits
+
+    if i != len(string):
+        finalBits = int_to_bytes(int(string[i:], 2))
+        bites += finalBits
+
+    return bites
+
+
+def int_to_bytes(input_int):
+    isinstance(input_int, int) or exit(99)
+    (input_int >= 0) or exit(98)
+    if input_int == 0:
+        return bytes([0])
+    L1 = []
+
+    num_bits = input_int.bit_length()
+
+    while input_int:
+        L1[0:0] = [(input_int & 0xFF)]
+        input_int >>= 8
+
+    if (num_bits % 8) == 0:
+        L1[0:0] = [0]
+
+    return bytes(L1)
 
 
 def jacknife_error(data):
@@ -219,7 +253,7 @@ def entropy2(labels, base=None):
     ent = 0.0
 
     # Compute entropy
-    base = e if base is None else base
+    base = math.e if base is None else base
     for i in probs:
         ent -= i * math.log(i, base)
 
@@ -238,3 +272,46 @@ def percentage_and_error(strings, compressed):
     perc_means = [np.mean(group) for group in percentage]
     perc_errs = [jacknife_error(group) for group in percentage]
     return perc_means, perc_errs
+
+
+def comparative_barplot(
+    datas: list,
+    yerrs: list,
+    labels: list,
+    xticks: list,
+    ylabel: str,
+    xlabel: str,
+    title: str,
+    filepath: str,
+):
+    """_summary_
+
+    Args:
+        datas (list): _description_
+        yerrs (list): _description_
+        labels (list): _description_
+        xticks (list): _description_
+        ylabel (str): _description_
+        xlabel (str): _description_
+        title (str): _description_
+        filepath (str): _description_
+    """
+    fig, ax = plt.subplots(figsize=(12, 8))
+    x = np.arange(len(xticks))
+    width = 0.35
+    nbars = len(datas)
+
+
+    for i in range(2):
+        rects = ax.bar(x - width / 2 + 2*i/nbars*width, datas[i], width, yerr=yerrs[i], label=labels[i])
+        ax.bar_label(rects, padding=3)
+
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
+    ax.set_xlabel(xlabel)
+    ax.set_xticks(x, xticks)
+    ax.legend()
+
+    fig.tight_layout()
+    plt.savefig(filepath)
+    plt.close()

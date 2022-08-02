@@ -10,7 +10,7 @@ generated_strings = []
 for i in range(len(sizes)):
     group = []
     for j in range(nSims):
-        string = convert_to_string(
+        string = convert_to_string_table(
             "particlescollide3_size{}_num{}".format(str(int(sizes[i])), str(j))
         )
         group.append(string)

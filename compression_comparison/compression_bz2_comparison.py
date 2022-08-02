@@ -13,7 +13,7 @@ for i in range(len(sizes)):
     gen_sized = []
     comp_gen_sized = []
     for j in range(nSims):
-        string = convert_to_string(
+        string = convert_to_string_table(
             "particlescollide3_size{}_num{}".format(str(int(sizes[i])), str(j))
         )
         bites = convert_to_bytes_object(string)
