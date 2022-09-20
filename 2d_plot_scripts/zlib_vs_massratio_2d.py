@@ -11,7 +11,7 @@ for i in range(20):
     for j in range(20):
         column = []
         for k in range(10):
-            string = convert_to_string(
+            string = convert_to_string_file(
                 "Experiments/runs_mass_tests2d/index"
                 + str(i)
                 + "_"
@@ -19,8 +19,9 @@ for i in range(20):
                 + "_"
                 + str(k)
             )
-            size = sys.getsizeof(string.encode())
-            comp_size = sys.getsizeof(zlib.compress(string.encode()))
+            bites = convert_to_bytes_object(string)
+            size = sys.getsizeof(bites)
+            comp_size = sys.getsizeof(zlib.compress(bites))
             column.append(comp_size / size)
         row.append(column)
     zlibs.append(row)
