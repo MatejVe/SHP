@@ -11,7 +11,7 @@ for i in range(20):
     for j in range(20):
         column = []
         for k in range(10):
-            string = convert_to_string(
+            string = convert_to_string_file(
                 "Experiments/runs_mass_tests2d/index"
                 + str(i)
                 + "_"

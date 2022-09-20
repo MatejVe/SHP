@@ -11,7 +11,8 @@ for i in range(20):
     for j in range(20):
         column = []
         for k in range(10):
-            string = convert_to_string(
+            print(f"Procesing file: i={i}, j={j}, k={k}.")
+            string = convert_to_string_file(
                 "Experiments/runs_mass_tests2d/index"
                 + str(i)
                 + "_"
@@ -21,7 +22,7 @@ for i in range(20):
             )
             size = len(string)
             comp_size = len(encoder.encode_b(string))
-            column.append(comp_size / size)
+            column.append(100 * comp_size / size)
         row.append(column)
     customs.append(row)
 

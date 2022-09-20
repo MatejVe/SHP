@@ -31,6 +31,7 @@ def convert_to_string_table(tableName):
         crnt = next
     return string
 
+
 def convert_to_string_file(filepath):
     f = open(filepath)
     collisions = []
@@ -41,7 +42,7 @@ def convert_to_string_file(filepath):
         left = int(left) + 3 if int(left) < 0 else int(left)
         right = int(right) + 3 if int(right) < 0 else int(right)
         collisions.append((left, right))
-    
+
     string = ""
     crnt = collisions[0]
     for i in range(1, len(collisions)):
@@ -69,6 +70,19 @@ def convert_to_bytes_object(string, bitsToBytes=8):
         finalBits = int_to_bytes(int(string[i:], 2))
         bites += finalBits
 
+    return bites
+
+
+def write_to_file_bytes_object(bites, filename):
+    f = open(filename, "wb")
+    f.write(bites)
+    f.close()
+
+
+def read_bytes_from_file(filename):
+    f = open(filename, "rb")
+    bites = f.read()
+    f.close()
     return bites
 
 
@@ -325,9 +339,14 @@ def comparative_barplot(
     width = 0.35
     nbars = len(datas)
 
-
     for i in range(2):
-        rects = ax.bar(x - width / 2 + 2*i/nbars*width, datas[i], width, yerr=yerrs[i], label=labels[i])
+        rects = ax.bar(
+            x - width / 2 + 2 * i / nbars * width,
+            datas[i],
+            width,
+            yerr=yerrs[i],
+            label=labels[i],
+        )
         ax.bar_label(rects, padding=3)
 
     ax.set_ylabel(ylabel)

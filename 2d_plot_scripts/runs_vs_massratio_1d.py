@@ -9,7 +9,7 @@ Zs = []
 for i in range(50):
     Zratio = []
     for j in range(40):
-        string = convert_to_string(
+        string = convert_to_string_file(
             "Experiments/runs_mass_tests1d/index" + str(i) + "_" + str(j)
         )
         result = runsTest(string)

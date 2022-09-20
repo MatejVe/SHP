@@ -23,7 +23,7 @@ for i in range(40):
     for j in range(40):
         column = []
         for k in range(10):
-            string = convert_to_string(
+            string = convert_to_string_file(
                 "Experiments/runs_2d_zoomzoom/index"
                 + str(i)
                 + "_"

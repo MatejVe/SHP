@@ -3,90 +3,116 @@ import matplotlib.pyplot as plt
 import sys
 import zlib
 import bz2
+import time
 
 from auxiliary import *
 
 encoder = RunLengthEncoder()
 
-sizes = np.logspace(2, 5, 4)
-nSims = 10
+sizes = np.logspace(2, 7, 6)
+nSims = 40
 
 # Find entropy, zlib, bz2 compression percentage, and custom compression
 # percentage
-generated_sizes = []
-generated_lenghts = []
-zlib_generated = []
-bz2_generated = []
-encoder_generated = []
-entropy_generated = []
+generated_zlib_percs = []
+generated_bz2_percs = []
+generated_encoder_percs = []
+generated_entropy = []
 
 for i in range(len(sizes)):
-    gen_row = []
-    gen_len_row = []
     zlib_row = []
     bz2_row = []
     encoder_row = []
     entropy_row = []
 
     for j in range(nSims):
-        string = convert_to_string_table(
-            "particlescollide3_size{}_num{}".format(str(int(sizes[i])), str(j))
+        print(f"Processed {(i*40+j)/(40*6)*100}% of generated strings.")
+        print(f"Processing size {i}, number {j}.")
+
+        start_time = time.time()
+        string = convert_to_string_file(
+            "Experiments/3particlestrings/size{}_{}".format(str(int(sizes[i])), str(j))
         )
-        bites = convert_to_bytes_object(string)
-        gen_row.append(sys.getsizeof(bites))
-        gen_len_row.append(len(string))
-        zlib_row.append(sys.getsizeof(zlib.compress(bites)))
-        bz2_row.append(sys.getsizeof(bz2.compress(bites)))
-        encoder_row.append(len(encoder.encode_b(string)))
+        bites = read_bytes_from_file(
+            "Experiments/3particlestrings/bites{}_{}".format(str(int(sizes[i])), str(j))
+        )
+        end_time = time.time()
+        print(
+            f"It took me {end_time-start_time:.2f}s to read in the string and the bites object."
+        )
+
+        size = sys.getsizeof(bites)
+        string_length = len(string)
+
+        comp_zlib = sys.getsizeof(zlib.compress(bites))
+        comp_bz2 = sys.getsizeof(bz2.compress(bites))
+        comp_custom = len(encoder.encode_b(string))
+
+        zlib_row.append(100 * comp_zlib / size)
+        bz2_row.append(100 * comp_bz2 / size)
+        encoder_row.append(100 * comp_custom / string_length)
         entropy_row.append(entropy2(string, base=2))
 
-    generated_sizes.append(gen_row)
-    generated_lenghts.append(gen_len_row)
-    zlib_generated.append(zlib_row)
-    bz2_generated.append(bz2_row)
-    encoder_generated.append(encoder_row)
-    entropy_generated.append(entropy_row)
+    generated_zlib_percs.append(zlib_row)
+    generated_bz2_percs.append(bz2_row)
+    generated_encoder_percs.append(encoder_row)
+    generated_entropy.append(entropy_row)
 
 lengths = [int(size) for size in sizes]
 
 # Find  entropy, zlib, bz2 compression percentage, and custom compression
 # percentage for random strings
-rand_sizes = []
-rand_lengths = []
-zlib_random = []
-bz2_random = []
-encoder_random = []
-entropy_random = []
+random_zlib_percs = []
+random_bz2_percs = []
+random_encoder_percs = []
+random_entropy = []
 
-for length in lengths:
-    rand_row = []
-    rand_len_row = []
+for i in range(len(sizes)):
     zlib_row = []
     bz2_row = []
     encoder_row = []
     entropy_row = []
+
     for j in range(nSims):
-        randomString = "".join([str(r) for r in np.random.randint(0, 2, size=length)])
-        bites = convert_to_bytes_object(randomString)
-        rand_row.append(sys.getsizeof(bites))
-        rand_len_row.append(len(randomString))
-        zlib_row.append(sys.getsizeof(zlib.compress(bites)))
-        bz2_row.append(sys.getsizeof(bz2.compress(bites)))
-        encoder_row.append(len(encoder.encode_b(randomString)))
+        print(f"Processed {(i*40+j)/(40*6)*100}% of random strings.")
+        print(f"Processing {i}, number {j}.")
+
+        start_time = time.time()
+        randomString = "".join(
+            [str(r) for r in np.random.randint(0, 2, size=lengths[i])]
+        )
+        bites = read_bytes_from_file(
+            "Experiments/3particlestrings/randombites{}_{}".format(
+                str(int(sizes[i])), str(j)
+            )
+        )
+        end_time = time.time()
+        print(
+            f"It took me {end_time-start_time:.2f}s to read in the random string and bites."
+        )
+
+        size = sys.getsizeof(bites)
+        string_length = len(randomString)
+
+        comp_zlib = sys.getsizeof(zlib.compress(bites))
+        comp_bz2 = sys.getsizeof(bz2.compress(bites))
+        comp_custom = len(encoder.encode_b(randomString))
+
+        zlib_row.append(100 * comp_zlib / size)
+        bz2_row.append(100 * comp_bz2 / size)
+        encoder_row.append(100 * comp_custom / string_length)
         entropy_row.append(entropy2(randomString, base=2))
 
-    rand_sizes.append(rand_row)
-    rand_lengths.append(rand_len_row)
-    zlib_random.append(zlib_row)
-    bz2_random.append(bz2_row)
-    encoder_random.append(encoder_row)
-    entropy_random.append(entropy_row)
+    random_zlib_percs.append(zlib_row)
+    random_bz2_percs.append(bz2_row)
+    random_encoder_percs.append(encoder_row)
+    random_entropy.append(entropy_row)
 
 # Plot entropy comparison
-gen_ent = [round(np.mean([e for e in group]), 2) for group in entropy_generated]
-gen_ent_errs = [jacknife_error(group) for group in entropy_generated]
-rand_ent = [round(np.mean([e for e in group]), 2) for group in entropy_random]
-rand_ent_errs = [jacknife_error(group) for group in entropy_random]
+gen_ent = [round(np.mean(group), 2) for group in generated_entropy]
+gen_ent_errs = [jacknife_error(group) for group in generated_entropy]
+rand_ent = [round(np.mean(group), 2) for group in random_entropy]
+rand_ent_errs = [jacknife_error(group) for group in random_entropy]
 
 fig, axes = plt.subplots(2, 2, figsize=(16, 10))
 labels = [str(length) for length in lengths]
@@ -114,82 +140,90 @@ ax.bar_label(rects1, padding=3)
 ax.bar_label(rects2, padding=3)
 
 # Plot zlib compression percentage
-zlib_gen_perc, zlib_gen_errs = percentage_and_error(generated_sizes, zlib_generated)
-zlib_gen_perc = [round(i, 2) for i in zlib_gen_perc]
-zlib_rand_perc, zlib_rand_errs = percentage_and_error(rand_sizes, zlib_random)
-zlib_rand_perc = [round(i, 2) for i in zlib_rand_perc]
+generated_zlib_means = [round(np.mean(size), 2) for size in generated_zlib_percs]
+random_zlib_means = [round(np.mean(size), 2) for size in random_zlib_percs]
+
+generated_zlib_stds = [jacknife_error(size) for size in generated_zlib_percs]
+random_zlib_stds = [jacknife_error(size) for size in random_zlib_percs]
+
 ax = axes[0][1]
 rects1 = ax.bar(
     x - width / 2,
-    zlib_gen_perc,
+    generated_zlib_means,
     width,
-    yerr=zlib_gen_errs,
+    yerr=generated_zlib_stds,
     label="Collision generated strings",
 )
 rects2 = ax.bar(
-    x + width / 2, zlib_rand_perc, width, yerr=zlib_rand_errs, label="Random strings"
+    x + width / 2,
+    random_zlib_means,
+    width,
+    yerr=random_zlib_stds,
+    label="Random strings",
 )
 ax.set_ylabel("Compression percentage")
 ax.set_title("Compression percentage by length, \n zlib compression algorithm")
 ax.set_xlabel("String length")
 ax.set_xticks(x, labels)
-ax.set_ylim(0, 1.4)
+ax.set_ylim(0, 130)
 ax.legend()
 ax.bar_label(rects1, padding=3)
 ax.bar_label(rects2, padding=3)
 
 # Plot bz2 compression percentage
-bz2_gen_perc, bz2_gen_errs = percentage_and_error(generated_sizes, bz2_generated)
-bz2_gen_perc = [round(i, 2) for i in bz2_gen_perc]
-bz2_rand_perc, bz2_rand_errs = percentage_and_error(rand_sizes, bz2_random)
-bz2_rand_perc = [round(i, 2) for i in bz2_rand_perc]
+generated_bz2_means = [round(np.mean(size), 2) for size in generated_bz2_percs]
+random_bz2_means = [round(np.mean(size), 2) for size in random_bz2_percs]
+
+generated_bz2_stds = [jacknife_error(size) for size in generated_bz2_percs]
+random_bz2_stds = [jacknife_error(size) for size in random_bz2_percs]
+
 ax = axes[1][0]
 rects1 = ax.bar(
     x - width / 2,
-    bz2_gen_perc,
+    generated_bz2_means,
     width,
-    yerr=bz2_gen_errs,
+    yerr=generated_bz2_stds,
     label="Collision generated strings",
 )
 rects2 = ax.bar(
-    x + width / 2, bz2_rand_perc, width, yerr=bz2_rand_errs, label="Random strings"
+    x + width / 2, random_bz2_means, width, yerr=random_bz2_stds, label="Random strings"
 )
 ax.set_ylabel("Compression percentage")
 ax.set_title("Compression percentage by length, \n bz2 compression algorithm")
 ax.set_xlabel("String length")
 ax.set_xticks(x, labels)
-ax.set_ylim(0, 2.2)
+ax.set_ylim(0, 210)
 ax.legend()
 ax.bar_label(rects1, padding=3)
 ax.bar_label(rects2, padding=3)
 
 # Plot custom compression algorithm compression percentage
-encoder_gen_perc, encoder_gen_errs = percentage_and_error(
-    generated_lenghts, encoder_generated
-)
-encoder_gen_perc = [round(i, 2) for i in encoder_gen_perc]
-encoder_rand_perc, encoder_rand_errs = percentage_and_error(rand_lengths, encoder_random)
-encoder_rand_perc = [round(i, 2) for i in encoder_rand_perc]
+generated_custom_means = [round(np.mean(size), 2) for size in generated_encoder_percs]
+random_custom_means = [round(np.mean(size), 2) for size in random_encoder_percs]
+
+generated_custom_stds = [jacknife_error(size) for size in generated_encoder_percs]
+random_custom_stds = [jacknife_error(size) for size in random_encoder_percs]
+
 ax = axes[1][1]
 rects1 = ax.bar(
     x - width / 2,
-    encoder_gen_perc,
+    generated_custom_means,
     width,
-    yerr=encoder_gen_errs,
+    yerr=generated_custom_stds,
     label="Collision generated strings",
 )
 rects2 = ax.bar(
     x + width / 2,
-    encoder_rand_perc,
+    random_custom_means,
     width,
-    yerr=encoder_rand_errs,
+    yerr=random_custom_stds,
     label="Random strings",
 )
 ax.set_ylabel("Compression percentage")
 ax.set_title("Compression percentage by length, custom compression algorithm")
 ax.set_xlabel("String length")
 ax.set_xticks(x, labels)
-ax.set_ylim(0, 1.4)
+ax.set_ylim(0, 130)
 ax.legend()
 ax.bar_label(rects1, padding=3)
 ax.bar_label(rects2, padding=3)

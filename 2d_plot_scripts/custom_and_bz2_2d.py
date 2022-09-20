@@ -16,7 +16,8 @@ for i in range(20):
         columnC = []
         columnB = []
         for k in range(10):
-            string = convert_to_string(
+            print(f"Processing i={i}, j={j}, k={k}.")
+            string = convert_to_string_file(
                 "Experiments/runs_mass_tests2d/index"
                 + str(i)
                 + "_"
@@ -24,12 +25,13 @@ for i in range(20):
                 + "_"
                 + str(k)
             )
+            bites = convert_to_bytes_object(string)
             sizeC = len(string)
-            sizeB = sys.getsizeof(string.encode())
+            sizeB = sys.getsizeof(bites)
             comp_sizeC = len(encoder.encode_b(string))
-            comp_sizeB = sys.getsizeof(bz2.compress(string.encode()))
-            columnC.append(comp_sizeC / sizeC)
-            columnB.append(comp_sizeB / sizeB)
+            comp_sizeB = sys.getsizeof(bz2.compress(bites))
+            columnC.append(100 * comp_sizeC / sizeC)
+            columnB.append(100 * comp_sizeB / sizeB)
         rowC.append(columnC)
         rowB.append(columnB)
     customs.append(rowC)

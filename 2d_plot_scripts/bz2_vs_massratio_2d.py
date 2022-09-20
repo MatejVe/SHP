@@ -4,14 +4,18 @@ from auxiliary import *
 import bz2
 import sys
 
-bz2s = []
+generated_sizes = []
+generated_compressed = []
 
 for i in range(20):
-    row = []
+    size_row = []
+    compressed_row = []
     for j in range(20):
-        column = []
+        size_column = []
+        compressed_column = []
         for k in range(10):
-            string = convert_to_string(
+            print(f"Procesing file: i={i}, j={j}, k={k}.")
+            string = convert_to_string_file(
                 "Experiments/runs_mass_tests2d/index"
                 + str(i)
                 + "_"
@@ -19,14 +23,43 @@ for i in range(20):
                 + "_"
                 + str(k)
             )
-            size = sys.getsizeof(string.encode())
-            comp_size = sys.getsizeof(bz2.compress(string.encode()))
-            column.append(comp_size / size)
-        row.append(column)
-    bz2s.append(row)
+            bites = convert_to_bytes_object(string)
+            size = sys.getsizeof(bites)
+            comp_size = sys.getsizeof(bz2.compress(bites))
 
-plot = [[np.mean(bz2s[i][j]) for i in range(20)] for j in range(20)]
-errs = [[jacknife_error(bz2s[i][j]) for i in range(20)] for j in range(20)]
+            size_column.append(size)
+            compressed_column.append(comp_size)
+
+        size_row.append(size_column)
+        compressed_row.append(compressed_column)
+
+    generated_sizes.append(size_row)
+    generated_compressed.append(compressed_row)
+
+plot = [
+    [
+        np.mean(
+            [
+                100 * generated_compressed[i][j][k] / generated_sizes[i][j][k]
+                for k in range(10)
+            ]
+        )
+        for i in range(20)
+    ]
+    for j in range(20)
+]
+errs = [
+    [
+        jacknife_error(
+            [
+                100 * generated_compressed[i][j][k] / generated_sizes[i][j][k]
+                for k in range(10)
+            ]
+        )
+        for i in range(20)
+    ]
+    for j in range(20)
+]
 
 fig, axes = plt.subplots(1, 2, figsize=(16, 8))
 

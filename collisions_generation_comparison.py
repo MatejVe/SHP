@@ -30,7 +30,9 @@ for i in range(len(sizes)):
             initVels=vels,
             initPoss=poss,
         )
-        experiment.run(shouldLog=["collideIndices"], storageType='table', storageName=tableName)
+        experiment.run(
+            shouldLog=["collideIndices"], storageType="table", storageName=tableName
+        )
         time22 = time.time()
         print(f"It took me {time22-time11:.2f}s to simulate size {sizes[i]}.")
         # Save the first few position and velocity data so we can see what is going on

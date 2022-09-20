@@ -6,7 +6,7 @@ from simulation import *
 ratios13 = np.linspace(0.05, 0.2, 20)
 ratios23 = np.linspace(0.8, 0.9, 20)
 
-for i, ratio13 in enumerate(ratios13):
+""" for i, ratio13 in enumerate(ratios13):
     for j, ratio23 in enumerate(ratios23):
         masses = np.array([ratio13, ratio23, 1])
         for k in range(5):
@@ -20,7 +20,7 @@ for i, ratio13 in enumerate(ratios13):
             filename = (
                 "Experiments/runs_2d_zoom/index" + str(i) + "_" + str(j) + "_" + str(k)
             )
-            experiment.run(shouldLog=["collideIndices"], filename=filename)
+            experiment.run(shouldLog=["collideIndices"], filename=filename) """
 
 Zs = []
 
@@ -29,7 +29,7 @@ for i in range(20):
     for j in range(20):
         column = []
         for k in range(5):
-            string = convert_to_string(
+            string = convert_to_string_file(
                 "Experiments/runs_2d_zoom/index" + str(i) + "_" + str(j) + "_" + str(k)
             )
             result = runsTest(string)

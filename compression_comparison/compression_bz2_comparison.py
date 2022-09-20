@@ -3,79 +3,80 @@ import matplotlib.pyplot as plt
 import sys
 import bz2
 from auxiliary import *
+import time
 
-sizes = np.logspace(2, 5, 4)
-nSims = 10
+sizes = np.logspace(2, 7, 6)
+nSims = 40
 
-generated_sizes = []
-compressed_generated = []
+generated_all_percs = []
 for i in range(len(sizes)):
-    gen_sized = []
-    comp_gen_sized = []
+    generated_singlesize_percs = []
+
     for j in range(nSims):
-        string = convert_to_string_table(
-            "particlescollide3_size{}_num{}".format(str(int(sizes[i])), str(j))
+        print(f"Processed {(i*40+j)/(40*6)*100}% of generated strings.")
+        print(f"Processing {i}, number {j}.")
+
+        start_time = time.time()
+        bites = read_bytes_from_file(
+            "Experiments/3particlestrings/bites{}_{}".format(str(int(sizes[i])), str(j))
         )
-        bites = convert_to_bytes_object(string)
+        end_time = time.time()
+        print(
+            f"It took me {end_time-start_time:.2f}s to read the bites object in memory."
+        )
         size = sys.getsizeof(bites)
         comp_size = sys.getsizeof(bz2.compress(bites))
 
-        gen_sized.append(size)
-        comp_gen_sized.append(comp_size)
+        generated_singlesize_percs.append(100 * comp_size / size)
 
-    generated_sizes.append(gen_sized)
-    compressed_generated.append(comp_gen_sized)
+    generated_all_percs.append(generated_singlesize_percs)
 
 lengths = [int(size) for size in sizes]
 
-random_sizes = []
-compressed_random = []
-for length in lengths:
-    rand_sized = []
-    comp_rand_sized = []
+random_all_percs = []
+for i in range(len(sizes)):
+    random_singlesize_percs = []
+
     for j in range(nSims):
-        randomString = "".join([str(r) for r in np.random.randint(0, 2, size=length)])
-        bites = convert_to_bytes_object(randomString)
+        print(f"Processed {(i*40+j)/(40*6)*100}% of random strings.")
+        print(f"Processing {i}, number {j}.")
+
+        bites = read_bytes_from_file(
+            "Experiments/3particlestrings/randombites{}_{}".format(
+                str(int(sizes[i])), str(j)
+            )
+        )
         size = sys.getsizeof(bites)
         comp_size = sys.getsizeof(bz2.compress(bites))
 
-        rand_sized.append(size)
-        comp_rand_sized.append(comp_size)
+        random_singlesize_percs.append(100 * comp_size / size)
 
-    random_sizes.append(rand_sized)
-    compressed_random.append(comp_rand_sized)
+    random_all_percs.append(random_singlesize_percs)
 
+start_time = time.time()
 # Find means and stds
-gen_size_means = [np.mean(sized) for sized in generated_sizes]
-rand_size_means = [np.mean(sized) for sized in random_sizes]
+generated_percentage_means = [np.mean(size) for size in generated_all_percs]
+random_percentage_means = [np.mean(size) for size in random_all_percs]
 
-gen_comp_means = [np.mean(sized) for sized in compressed_generated]
-rand_comp_means = [np.mean(sized) for sized in compressed_random]
-
-percentage_generated = [
-    [gen_comp / gen for gen_comp in sized]
-    for gen, sized in zip(gen_size_means, compressed_generated)
-]
-percentage_random = [
-    [rand_comp / rand for rand_comp in sized]
-    for rand, sized in zip(rand_size_means, compressed_random)
-]
-
-perc_gen_means = [100*round(np.mean(size), 3) for size in percentage_generated]
-perc_gen_stds = [100*jacknife_error(size) for size in percentage_generated]
-
-perc_rand_means = [100*round(np.mean(size), 3) for size in percentage_random]
-perc_rand_stds = [100*jacknife_error(size) for size in percentage_random]
+generated_percentage_stds = [jacknife_error(size) for size in generated_all_percs]
+random_percentage_stds = [jacknife_error(size) for size in random_all_percs]
+end_time = time.time()
+print(
+    f"Finding the mean and the standard deviation took me {end_time-start_time:.2f}s."
+)
 
 labels = [str(length) for length in lengths]
 
 comparative_barplot(
-    datas=[perc_gen_means, perc_rand_means],
-    yerrs=[perc_gen_stds, perc_rand_stds],
-    labels=["Compression percentage \nof generated strings", "Compression percentage \nof random strings"],
+    datas=[generated_percentage_means, random_percentage_means],
+    yerrs=[generated_percentage_stds, random_percentage_stds],
+    labels=[
+        "Compression percentage \nof generated strings",
+        "Compression percentage \nof random strings",
+    ],
     xticks=labels,
     ylabel="Compression percentage",
     xlabel="Number of bits in the string",
-    title = "Compression percentage, bz2 compression algorithm",
-    filepath="Plots/comparison_graphs/compression_bz2_comparison"
+    title="Compression percentage, bz2 compression algorithm",
+    filepath="Plots/comparison_graphs/compression_bz2_comparison",
 )

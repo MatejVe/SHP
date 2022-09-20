@@ -3,15 +3,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 from auxiliary import *
 
-sizes = np.logspace(2, 5, 4)
-nSims = 10
+sizes = np.logspace(2, 7, 6)
+nSims = 40
 
 generated_strings = []
 for i in range(len(sizes)):
     group = []
     for j in range(nSims):
-        string = convert_to_string_table(
-            "particlescollide3_size{}_num{}".format(str(int(sizes[i])), str(j))
+        print(f"Processed {(i*40+j)/(40*6)*100}% of generated strings.")
+        print(f"Processing size {i}, number {j}.")
+
+        string = convert_to_string_file(
+            "Experiments/3particlestrings/size{}_{}".format(str(int(sizes[i])), str(j))
         )
         group.append(string)
     generated_strings.append(group)
@@ -51,10 +54,13 @@ labels = [str(length) for length in lengths]
 comparative_barplot(
     datas=[generated_entropies, random_entropies],
     yerrs=[gen_errs, rand_errs],
-    labels=["Entropy of collision generated strings", "Entropy of random generated strings"],
+    labels=[
+        "Entropy of collision generated strings",
+        "Entropy of random generated strings",
+    ],
     xticks=labels,
     ylabel="Entropy [bits]",
     xlabel="Number of bits in the string",
     title="Entropy by number of bits",
-    filepath="Plots/comparison_graphs/entropy_comparison"
+    filepath="Plots/comparison_graphs/entropy_comparison",
 )

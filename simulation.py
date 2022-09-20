@@ -303,7 +303,9 @@ class Simulation:
             initVelocities=initVels,
         )
 
-    def run(self, shouldPrint=None, shouldLog=None, storageType='table', storageName=None):
+    def run(
+        self, shouldPrint=None, shouldLog=None, storageType="table", storageName=None
+    ):
         """
         This function collides the particles preset amount of times.
 
@@ -321,7 +323,7 @@ class Simulation:
             filename (string, optional): Path and the filename of where you want the shouldLog data saved. If using shouldLog
                                         argument please provide the path as well.
         """
-        if storageName is not None and storageType=='table':
+        if storageName is not None and storageType == "table":
             # Extract how many collumns we will need
             fieldsNum = 0
             names = []
@@ -352,7 +354,7 @@ class Simulation:
                 c.execute("DROP TABLE %s" % storageName)
             # Create a new table with all the data that is to be saved
             c.execute("CREATE TABLE '{}' ({})".format(storageName, columnNamesString))
-        elif storageType=='file' and storageName is not None:
+        elif storageType == "file" and storageName is not None:
             f = open(storageName, "w")
             # write down the number of particles and their masses
             massStr = " ".join(str(mass) for mass in self.sistem.masses)
@@ -363,19 +365,21 @@ class Simulation:
 
             attributeStr = "|".join(attribute for attribute in shouldLog)
             f.write(attributeStr + "\n")
-        elif storageType=='returnData':
+        elif storageType == "returnData":
             # we will store everything in a dictionary that will be returned
             dataDict = {}
             # store masses
-            dataDict['masses'] = [mass for mass in self.sistem.masses]
-            dataDict['particle number'] = self.sistem.particleNum
+            dataDict["masses"] = [mass for mass in self.sistem.masses]
+            dataDict["particle number"] = self.sistem.particleNum
             for attribute in shouldLog:
                 dataDict[attribute] = []
         else:
-            raise Exception("Invalid input combination of 'storageType' and/or 'storageName'.")
+            raise Exception(
+                "Invalid input combination of 'storageType' and/or 'storageName'."
+            )
 
         for _ in range(self.collisionNumber):
-            if storageName is not None and storageType=='table':
+            if storageName is not None and storageType == "table":
                 QUESTIONMARKS = ",".join(["?"] * fieldsNum)
                 dataRow = []
 
@@ -398,7 +402,7 @@ class Simulation:
                     tuple(dataRow),
                 )
                 conn.commit()
-            elif storageType=='file' and storageName is not None:
+            elif storageType == "file" and storageName is not None:
                 for attribute in shouldLog:
                     if hasattr(self.sistem, attribute):
                         values = getattr(self.sistem, attribute)
@@ -411,10 +415,12 @@ class Simulation:
                         else:
                             f.write(str(getattr(self.sistem, attribute)) + "|")
                 f.write("\n")
-            elif storageType=='returnData':
+            elif storageType == "returnData":
                 for attribute in shouldLog:
                     if hasattr(self.sistem, attribute):
-                        dataDict[attribute].append(tuple(getattr(self.sistem, attribute)))
+                        dataDict[attribute].append(
+                            tuple(getattr(self.sistem, attribute))
+                        )
 
             if shouldPrint is not None:
                 for (
@@ -445,11 +451,11 @@ class Simulation:
 
             self.sistem.update_particles(self.sistem.time, self.sistem.collideIndices)
 
-        if storageName is not None and storageType=='table':
+        if storageName is not None and storageType == "table":
             conn.close()
-        elif storageType=='file' and storageName is not None:
+        elif storageType == "file" and storageName is not None:
             f.close()
-        elif storageType=='returnData':
+        elif storageType == "returnData":
             return dataDict
 
 
