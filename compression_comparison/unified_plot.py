@@ -4,6 +4,7 @@ import sys
 import zlib
 import bz2
 import time
+import secrets
 
 from auxiliary import *
 
@@ -46,7 +47,7 @@ for i in range(len(sizes)):
 
         comp_zlib = sys.getsizeof(zlib.compress(bites))
         comp_bz2 = sys.getsizeof(bz2.compress(bites))
-        comp_custom = len(encoder.encode_b(string))
+        comp_custom = len(encoder.encode_a(string))
 
         zlib_row.append(100 * comp_zlib / size)
         bz2_row.append(100 * comp_bz2 / size)
@@ -78,9 +79,10 @@ for i in range(len(sizes)):
         print(f"Processing {i}, number {j}.")
 
         start_time = time.time()
-        randomString = "".join(
-            [str(r) for r in np.random.randint(0, 2, size=lengths[i])]
-        )
+        #randomString = "".join(
+        #    [str(r) for r in np.random.randint(0, 2, size=lengths[i])]
+        #)
+        randomString = "".join([str(secrets.randbelow(2)) for i in range(lengths[i])])
         bites = read_bytes_from_file(
             "Experiments/3particlestrings/randombites{}_{}".format(
                 str(int(sizes[i])), str(j)
@@ -96,7 +98,7 @@ for i in range(len(sizes)):
 
         comp_zlib = sys.getsizeof(zlib.compress(bites))
         comp_bz2 = sys.getsizeof(bz2.compress(bites))
-        comp_custom = len(encoder.encode_b(randomString))
+        comp_custom = len(encoder.encode_a(randomString))
 
         zlib_row.append(100 * comp_zlib / size)
         bz2_row.append(100 * comp_bz2 / size)
@@ -140,8 +142,8 @@ ax.bar_label(rects1, padding=3)
 ax.bar_label(rects2, padding=3)
 
 # Plot zlib compression percentage
-generated_zlib_means = [round(np.mean(size), 2) for size in generated_zlib_percs]
-random_zlib_means = [round(np.mean(size), 2) for size in random_zlib_percs]
+generated_zlib_means = [round(np.mean(size), 1) for size in generated_zlib_percs]
+random_zlib_means = [round(np.mean(size), 1) for size in random_zlib_percs]
 
 generated_zlib_stds = [jacknife_error(size) for size in generated_zlib_percs]
 random_zlib_stds = [jacknife_error(size) for size in random_zlib_percs]
@@ -171,8 +173,8 @@ ax.bar_label(rects1, padding=3)
 ax.bar_label(rects2, padding=3)
 
 # Plot bz2 compression percentage
-generated_bz2_means = [round(np.mean(size), 2) for size in generated_bz2_percs]
-random_bz2_means = [round(np.mean(size), 2) for size in random_bz2_percs]
+generated_bz2_means = [round(np.mean(size), 1) for size in generated_bz2_percs]
+random_bz2_means = [round(np.mean(size), 1) for size in random_bz2_percs]
 
 generated_bz2_stds = [jacknife_error(size) for size in generated_bz2_percs]
 random_bz2_stds = [jacknife_error(size) for size in random_bz2_percs]
@@ -192,14 +194,14 @@ ax.set_ylabel("Compression percentage")
 ax.set_title("Compression percentage by length, \n bz2 compression algorithm")
 ax.set_xlabel("String length")
 ax.set_xticks(x, labels)
-ax.set_ylim(0, 210)
+ax.set_ylim(0, 240)
 ax.legend()
 ax.bar_label(rects1, padding=3)
 ax.bar_label(rects2, padding=3)
 
 # Plot custom compression algorithm compression percentage
-generated_custom_means = [round(np.mean(size), 2) for size in generated_encoder_percs]
-random_custom_means = [round(np.mean(size), 2) for size in random_encoder_percs]
+generated_custom_means = [round(np.mean(size), 1) for size in generated_encoder_percs]
+random_custom_means = [round(np.mean(size), 1) for size in random_encoder_percs]
 
 generated_custom_stds = [jacknife_error(size) for size in generated_encoder_percs]
 random_custom_stds = [jacknife_error(size) for size in random_encoder_percs]

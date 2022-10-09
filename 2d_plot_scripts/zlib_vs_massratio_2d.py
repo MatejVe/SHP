@@ -23,12 +23,14 @@ for i in range(20):
                 + "_"
                 + str(k)
             )
-            bites = convert_to_bytes_object(string)
+            bites = bitstring_to_bytes_compact(string)
             size = sys.getsizeof(bites)
             compressed_size = sys.getsizeof(zlib.compress(bites))
 
             size_column.append(size)
             compressed_column.append(compressed_size)
+            
+            print(f"Processed {(i*200+j*10+k)/(10*20*20)*100}%.")
 
         size_row.append(size_column)
         compressed_row.append(compressed_column)

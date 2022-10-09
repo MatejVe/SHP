@@ -57,39 +57,30 @@ def convert_to_string_file(filepath):
     return string
 
 
-def convert_to_bytes_object(string, bitsToBytes=8):
-    """Only use on binary strings"""
-    bites = b""
-    i = 0
-    while i < len(string) - bitsToBytes:
-        bits = int_to_bytes(int(string[i : i + bitsToBytes], 2))
-        i += bitsToBytes
-        bites += bits
+def write_to_file_bytes_object(bites, filename):
+    f = open(filename, "wb")
+    f.write(bites)
+    f.close()
 
-    if i != len(string):
-        finalBits = int_to_bytes(int(string[i:], 2))
-        bites += finalBits
 
+def read_bytes_from_file(filename):
+    f = open(filename, "rb")
+    bites = f.read()
+    f.close()
     return bites
 
 
-def int_to_bytes(input_int):
-    isinstance(input_int, int) or exit(99)
-    (input_int >= 0) or exit(98)
-    if input_int == 0:
-        return bytes([0])
-    L1 = []
+def bitstring_to_bytes_compact(s):
+    return int(s, 2).to_bytes(-(-len(s) // 8), byteorder='big')
 
-    num_bits = input_int.bit_length()
 
-    while input_int:
-        L1[0:0] = [(input_int & 0xFF)]
-        input_int >>= 8
-
-    if (num_bits % 8) == 0:
-        L1[0:0] = [0]
-
-    return bytes(L1)
+def bitstring_to_bytes(s):
+    v = int(s, 2)
+    b = bytearray()
+    while v:
+        b.append(v & 0xff)
+        v >>= 8
+    return bytes(b[::-1])
 
 
 def jacknife_error(data):

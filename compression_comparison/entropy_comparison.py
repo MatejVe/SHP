@@ -1,7 +1,7 @@
-from math import log, e
 import numpy as np
 import matplotlib.pyplot as plt
 from auxiliary import *
+import secrets
 
 sizes = np.logspace(2, 7, 6)
 nSims = 40
@@ -25,7 +25,8 @@ random_strings = []
 for length in lengths:
     group = []
     for j in range(nSims):
-        random = np.random.randint(0, 2, size=length)
+        #random = np.random.randint(0, 2, size=length)
+        random = [secrets.randbelow(2) for i in range(length)]
         random = [str(r) for r in random]
 
         group.append("".join(random))
