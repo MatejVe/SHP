@@ -47,7 +47,7 @@ for i in range(len(sizes)):
 
         comp_zlib = sys.getsizeof(zlib.compress(bites))
         comp_bz2 = sys.getsizeof(bz2.compress(bites))
-        comp_custom = len(encoder.encode_a(string))
+        comp_custom = len(encoder.encode_b(string))
 
         zlib_row.append(100 * comp_zlib / size)
         bz2_row.append(100 * comp_bz2 / size)
@@ -98,7 +98,7 @@ for i in range(len(sizes)):
 
         comp_zlib = sys.getsizeof(zlib.compress(bites))
         comp_bz2 = sys.getsizeof(bz2.compress(bites))
-        comp_custom = len(encoder.encode_a(randomString))
+        comp_custom = len(encoder.encode_b(randomString))
 
         zlib_row.append(100 * comp_zlib / size)
         bz2_row.append(100 * comp_bz2 / size)
