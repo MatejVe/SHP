@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from auxiliary import *
 from simulation import *
+import matplotlib
 
 ratios13 = np.linspace(0.05, 0.2, 20)
 ratios23 = np.linspace(0.8, 0.9, 20)
@@ -29,18 +30,20 @@ for i in range(20):
     for j in range(20):
         column = []
         for k in range(5):
+            print(f"Processing i={i}, j={j}, k={k}.")
             string = convert_to_string_file(
                 "Experiments/runs_2d_zoom/index" + str(i) + "_" + str(j) + "_" + str(k)
             )
             result = runsTest(string)
             if result is not None:
                 column.append(abs(result))
+            print(f"Processed {(i*100+j*5+k)/(5*20*20)*100}%.")
         row.append(column)
     Zs.append(row)
 plotZs = [[np.mean(Zs[i][j]) for i in range(20)] for j in range(20)]
 
 fig, axes = plt.subplots(1, 1, figsize=(9, 6))
-plot = axes.contourf(plotZs, extent=[0.05, 0.2, 0.8, 0.9], origin="lower")
+plot = axes.contourf(plotZs, extent=[0.05, 0.2, 0.8, 0.9], origin="lower", cmap=matplotlib.cm.get_cmap('viridis_r'))
 plt.colorbar(plot, ax=axes)
 axes.set_title("Runs test Z score in a zoomed in area")
 axes.set_xlabel("$m_1/m_3$ ratio")

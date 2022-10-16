@@ -12,7 +12,7 @@ for i in range(len(sizes)):
         print(f"{(i*40+j)/(6*40)*100:.2f}% done.")
 
         t1 = time.time()
-        string = convert_to_string_file(
+        string = convert_to_string_file_Graeme(
             "Experiments/3particlestrings/size{}_{}".format(str(int(sizes[i])), str(j))
         )
         t2 = time.time()
@@ -26,7 +26,7 @@ for i in range(len(sizes)):
         t1 = time.time()
         write_to_file_bytes_object(
             bites,
-            "Experiments/3particlestrings/bites{}_{}".format(
+            "Experiments/3particlestrings/Graeme_bites{}_{}".format(
                 str(int(sizes[i])), str(j)
             ),
         )
@@ -54,7 +54,7 @@ for i, length in enumerate(lengths):
         t1 = time.time()
         write_to_file_bytes_object(
             bites,
-            "Experiments/3particlestrings/randombites{}_{}".format(
+            "Experiments/3particlestrings/Graeme_randombites{}_{}".format(
                 str(int(sizes[i])), str(j)
             ),
         )

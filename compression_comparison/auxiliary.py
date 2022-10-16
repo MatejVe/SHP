@@ -57,6 +57,36 @@ def convert_to_string_file(filepath):
     return string
 
 
+def convert_to_string_file_Graeme(filepath):
+    f = open(filepath)
+    collisions = []
+    f.readline()
+    f.readline()
+    for line in f.readlines():
+        left, right = line.strip().split(" ")
+        left = int(left) + 3 if int(left) < 0 else int(left)
+        right = int(right) + 3 if int(right) < 0 else int(right)
+        
+        if (left==1 and right==2):
+            s = "A"
+        elif (left==2 and right==0):
+            s = "B"
+        elif (left==0 and right==1):
+            s = "C"
+        else:
+            print(left, right)
+            raise Exception("Error")
+        collisions.append(s)
+
+    string = ""
+    for i in range(1, len(collisions) - 1):
+        if collisions[i-1]==collisions[i+1]:
+            string += "1"
+        else:
+            string += "0"
+    return string
+
+
 def write_to_file_bytes_object(bites, filename):
     f = open(filename, "wb")
     f.write(bites)

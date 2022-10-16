@@ -31,11 +31,11 @@ for i in range(len(sizes)):
         print(f"Processing size {i}, number {j}.")
 
         start_time = time.time()
-        string = convert_to_string_file(
+        string = convert_to_string_file_Graeme(
             "Experiments/3particlestrings/size{}_{}".format(str(int(sizes[i])), str(j))
         )
         bites = read_bytes_from_file(
-            "Experiments/3particlestrings/bites{}_{}".format(str(int(sizes[i])), str(j))
+            "Experiments/3particlestrings/Graeme_bites{}_{}".format(str(int(sizes[i])), str(j))
         )
         end_time = time.time()
         print(
@@ -84,7 +84,7 @@ for i in range(len(sizes)):
         #)
         randomString = "".join([str(secrets.randbelow(2)) for i in range(lengths[i])])
         bites = read_bytes_from_file(
-            "Experiments/3particlestrings/randombites{}_{}".format(
+            "Experiments/3particlestrings/Graeme_randombites{}_{}".format(
                 str(int(sizes[i])), str(j)
             )
         )
@@ -231,5 +231,5 @@ ax.bar_label(rects1, padding=3)
 ax.bar_label(rects2, padding=3)
 
 fig.tight_layout()
-plt.savefig("Plots/comparison_graphs/unified_comparison")
+plt.savefig("Plots/comparison_graphs/unified_comparison_GraemeStrings")
 plt.close()

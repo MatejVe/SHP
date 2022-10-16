@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from auxiliary import *
+import matplotlib
 
 sratios = np.linspace(0.08, 0.12, 50)
 Zs = []
@@ -8,6 +9,7 @@ Zs = []
 for i in range(50):
     Zratio = []
     for j in range(40):
+        print(f"Processing i={i} and j={j}.")
         string = convert_to_string_file(
             "Experiments/runs_mass_tests1d/index" + str(i) + "_" + str(j)
         )
@@ -38,6 +40,7 @@ for i in range(40):
     for j in range(40):
         column = []
         for k in range(10):
+            print(f"Processing i={i}, j={j}, k={k}.")
             string = convert_to_string_file(
                 "Experiments/runs_2d_zoomzoom/index"
                 + str(i)
@@ -49,11 +52,12 @@ for i in range(40):
             result = runsTest(string)
             if result is not None:
                 column.append(abs(result))
+            print(f"Processed {(i*400+j*10+k)/(10*40*40)*100}%.")
         row.append(column)
     Zs.append(row)
 plotZs = [[np.mean(Zs[i][j]) for i in range(40)] for j in range(40)]
 
-plot = axes[1].contourf(plotZs, extent=[0.08, 0.12, 0.8, 0.9], origin="lower")
+plot = axes[1].contourf(plotZs, extent=[0.08, 0.12, 0.8, 0.9], origin="lower", cmap=matplotlib.cm.get_cmap('viridis_r'))
 plt.colorbar(plot, ax=axes[1])
 axes[1].set_title("Runs test Z score in a zoomed-in area")
 axes[1].set_xlabel("$m_1/m_3$ ratio")

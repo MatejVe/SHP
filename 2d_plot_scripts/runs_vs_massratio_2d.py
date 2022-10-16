@@ -1,8 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from auxiliary import *
-
-plt.rcParams["font.size"] = "20"
+import matplotlib
 
 Zs = []
 
@@ -30,13 +29,13 @@ errs = [[jacknife_error(Zs[i][j]) for i in range(20)] for j in range(20)]
 
 fig, axes = plt.subplots(1, 2, figsize=(16, 6))
 
-plot0 = axes[0].contourf(plotZs, extent=[0, 1, 0, 1], origin="lower")
+plot0 = axes[0].contourf(plotZs, extent=[0, 1, 0, 1], origin="lower", cmap=matplotlib.cm.get_cmap('viridis_r'))
 plt.colorbar(plot0, ax=axes[0])
 axes[0].set_title("Runs test Z score vs mass ratios.")
 axes[0].set_xlabel("$m_1/m_3$ ratio")
 axes[0].set_ylabel("$m_2/m_3$ ratio")
 
-plot1 = axes[1].contourf(errs, extent=[0, 1, 0, 1], origin="lower")
+plot1 = axes[1].contourf(errs, extent=[0, 1, 0, 1], origin="lower", cmap=matplotlib.cm.get_cmap('viridis_r'))
 plt.colorbar(plot1, ax=axes[1])
 axes[1].set_title("Variance in the Z score of the Runs test")
 axes[1].set_xlabel("$m_1/m_3$ ratio")
